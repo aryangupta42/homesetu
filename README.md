@@ -14,9 +14,9 @@
 
 ## 👥 Project Team — ByteBros
 
-| Member Name | Role | Email |
+| Member Name | Role | GitHub / Email |
 | :--- | :--- | :--- |
-| **Aryan Gupta** | Team Lead & Full-Stack Developer | `aryanguptaji686@gmail.com` |
+| **Aryan Gupta** | Team Lead & Full-Stack Developer | [@aryangupta42](https://github.com/aryangupta42) • `aryanguptaji686@gmail.com` |
 | **Arsh Mittal** | Backend & System Architecture | `arshm2772@gmail.com` |
 | **Archana** | Frontend & UI/UX Design | `archanabayee@gmail.com` |
 
@@ -209,11 +209,8 @@ To push this project to your GitHub account:
 2. Run the following commands in the project root:
 
 ```bash
-git init
-git add .
-git commit -m "feat: complete HomeSetu full-stack platform (React + Spring Boot)"
+git remote add origin https://github.com/aryangupta42/homesetu.git
 git branch -M main
-git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/homesetu.git
 git push -u origin main
 ```
 
