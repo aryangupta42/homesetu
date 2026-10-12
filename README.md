@@ -14,12 +14,12 @@
 
 ## 👥 Project Team — ByteBros
 
-| Member Name | Role | Contact / Details |
-| :--- | :--- | :--- |
-| **Arsh Mittal** | 👑 **Team Leader** & System Architect | `arshm2772@gmail.com` • `+91 87553 59505` |
-| **Aryan Gupta** | Core Full-Stack Developer | [@aryangupta42](https://github.com/aryangupta42) • `aryanguptaji686@gmail.com` • `+91 95558 99137` |
-| **Divyanshi Mittal** | Backend & Database Systems | `+91 93898 73080` |
-| **Manasvi Sharma** | Frontend & UI/UX Design | `+91 72480 27977` |
+| Member Name | Contact |
+| :--- | :--- |
+| **Arsh Mittal** *(Team Leader)* | `+91 87553 59505` |
+| **Aryan Gupta** | `+91 95558 99137` |
+| **Divyanshi Mittal** | `+91 93898 73080` |
+| **Manasvi Sharma** | `+91 72480 27977` |
 
 ---
 

@@ -3,10 +3,10 @@ import { Home, Heart, Mail, Shield, CheckCircle2, Sparkles, MapPin, Code2 } from
 
 export default function Footer() {
   const teamMembers = [
-    { name: "Arsh Mittal", role: "👑 Team Leader", phone: "+91 87553 59505", email: "arshm2772@gmail.com" },
-    { name: "Aryan Gupta", role: "Full-Stack Developer", phone: "+91 95558 99137", email: "aryanguptaji686@gmail.com" },
-    { name: "Divyanshi Mittal", role: "Backend & Database", phone: "+91 93898 73080", email: "divyanshi@homesetu.com" },
-    { name: "Manasvi Sharma", role: "Frontend & UI/UX", phone: "+91 72480 27977", email: "manasvi@homesetu.com" }
+    { name: "Arsh Mittal", isLeader: true, phone: "+91 87553 59505" },
+    { name: "Aryan Gupta", isLeader: false, phone: "+91 95558 99137" },
+    { name: "Divyanshi Mittal", isLeader: false, phone: "+91 93898 73080" },
+    { name: "Manasvi Sharma", isLeader: false, phone: "+91 72480 27977" }
   ];
 
   const futureScopeItems = [
@@ -72,17 +72,16 @@ export default function Footer() {
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {teamMembers.map((m, i) => (
-                <div key={i} className="p-3.5 rounded-xl bg-[#0a272e] border border-teal-800/60 text-xs space-y-1">
+                <div key={i} className="p-3.5 rounded-xl bg-[#0a272e] border border-teal-800/60 text-xs space-y-1.5">
                   <div className="font-bold text-white text-sm flex items-center justify-between">
                     <span>{m.name}</span>
+                    {m.isLeader && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold">
+                        Team Leader
+                      </span>
+                    )}
                   </div>
-                  <div className="text-[11px] text-amber-400/90 font-medium">{m.role}</div>
                   <div className="text-[11px] text-teal-300/80 font-mono">📞 {m.phone}</div>
-                  {m.email && (
-                    <a href={`mailto:${m.email}`} className="text-[10px] text-teal-300/70 hover:text-white truncate block">
-                      {m.email}
-                    </a>
-                  )}
                 </div>
               ))}
             </div>
