@@ -336,22 +336,22 @@ export const api = {
     if (email === "arsh@homesetu.com") {
       return {
         success: true,
-        user: { id: 1, fullName: "Arsh Mittal", email, role: "STUDENT", college: "Symbiosis Pune", phone: "+91 87553 59505", isLeader: true }
+        user: { id: 1, fullName: "Arsh Mittal", email, role: "STUDENT", college: "Symbiosis Pune", phone: "+91 98765 00001", isLeader: true }
       };
     } else if (email === "aryan@homesetu.com") {
       return {
         success: true,
-        user: { id: 2, fullName: "Aryan Gupta", email, role: "STUDENT", college: "COEP Pune", phone: "+91 95558 99137" }
+        user: { id: 2, fullName: "Aryan Gupta", email, role: "STUDENT", college: "COEP Pune", phone: "+91 98765 00002" }
       };
     } else if (email === "divyanshi@homesetu.com") {
       return {
         success: true,
-        user: { id: 3, fullName: "Divyanshi Mittal", email, role: "STUDENT", college: "MIT Pune", phone: "+91 93898 73080" }
+        user: { id: 3, fullName: "Divyanshi Mittal", email, role: "STUDENT", college: "MIT Pune", phone: "+91 98765 00003" }
       };
     } else if (email === "manasvi@homesetu.com") {
       return {
         success: true,
-        user: { id: 4, fullName: "Manasvi Sharma", email, role: "STUDENT", college: "Pune University", phone: "+91 72480 27977" }
+        user: { id: 4, fullName: "Manasvi Sharma", email, role: "STUDENT", college: "Pune University", phone: "+91 98765 00004" }
       };
     } else if (email === "ramesh@pgowner.com") {
       return {

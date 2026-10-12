@@ -9,7 +9,7 @@ export const DEMO_USERS = {
     fullName: "Arsh Mittal",
     email: "arsh@homesetu.com",
     role: "STUDENT",
-    phone: "+91 87553 59505",
+    phone: "+91 98765 00001",
     college: "Symbiosis International University",
     city: "Pune",
     isLeader: true
@@ -19,7 +19,7 @@ export const DEMO_USERS = {
     fullName: "Aryan Gupta",
     email: "aryan@homesetu.com",
     role: "STUDENT",
-    phone: "+91 95558 99137",
+    phone: "+91 98765 00002",
     college: "College of Engineering Pune (COEP)",
     city: "Pune"
   },
@@ -28,7 +28,7 @@ export const DEMO_USERS = {
     fullName: "Divyanshi Mittal",
     email: "divyanshi@homesetu.com",
     role: "STUDENT",
-    phone: "+91 93898 73080",
+    phone: "+91 98765 00003",
     college: "MIT World Peace University",
     city: "Pune"
   },
@@ -37,7 +37,7 @@ export const DEMO_USERS = {
     fullName: "Manasvi Sharma",
     email: "manasvi@homesetu.com",
     role: "STUDENT",
-    phone: "+91 72480 27977",
+    phone: "+91 98765 00004",
     college: "Savitribai Phule Pune University",
     city: "Pune"
   },
