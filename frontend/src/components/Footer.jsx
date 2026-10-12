@@ -65,26 +65,25 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Team ByteBros (Slide 1) */}
+          {/* Team ByteBros */}
           <div className="md:col-span-7 space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-400 block">
-              Developed by TEAM - ByteBros (Slide 1)
+              Developed by TEAM - ByteBros
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <ul className="space-y-2 text-xs sm:text-sm text-teal-200">
               {teamMembers.map((m, i) => (
-                <div key={i} className="p-3.5 rounded-xl bg-[#0a272e] border border-teal-800/60 text-xs space-y-1.5">
-                  <div className="font-bold text-white text-sm flex items-center justify-between">
-                    <span>{m.name}</span>
-                    {m.isLeader && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold">
-                        Team Leader
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[11px] text-teal-300/80 font-mono">📞 {m.phone}</div>
-                </div>
+                <li key={i} className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                  <span className="font-semibold text-white">{m.name}</span>
+                  {m.isLeader && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold">
+                      Team Leader
+                    </span>
+                  )}
+                  <span className="text-xs text-teal-300/70 font-mono">({m.phone})</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
 
