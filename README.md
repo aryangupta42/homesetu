@@ -14,11 +14,12 @@
 
 ## 👥 Project Team — ByteBros
 
-| Member Name | Role | GitHub / Email |
+| Member Name | Role | Contact / Details |
 | :--- | :--- | :--- |
-| **Aryan Gupta** | Team Lead & Full-Stack Developer | [@aryangupta42](https://github.com/aryangupta42) • `aryanguptaji686@gmail.com` |
-| **Arsh Mittal** | Backend & System Architecture | `arshm2772@gmail.com` |
-| **Archana** | Frontend & UI/UX Design | `archanabayee@gmail.com` |
+| **Arsh Mittal** | 👑 **Team Leader** & System Architect | `arshm2772@gmail.com` • `+91 87553 59505` |
+| **Aryan Gupta** | Core Full-Stack Developer | [@aryangupta42](https://github.com/aryangupta42) • `aryanguptaji686@gmail.com` • `+91 95558 99137` |
+| **Divyanshi Mittal** | Backend & Database Systems | `+91 93898 73080` |
+| **Manasvi Sharma** | Frontend & UI/UX Design | `+91 72480 27977` |
 
 ---
 
@@ -159,8 +160,10 @@ The platform comes pre-seeded with rich sample listings (Sunrise PG, Green Nest 
 
 | Persona | Name | Email | Password | Role |
 | :--- | :--- | :--- | :--- | :--- |
+| **Team Leader / Student** | Arsh Mittal | `arsh@homesetu.com` | `123456` | `STUDENT` |
 | **Student (COEP Pune)** | Aryan Gupta | `aryan@homesetu.com` | `123456` | `STUDENT` |
-| **Student (Symbiosis)** | Arsh Mittal | `arsh@homesetu.com` | `123456` | `STUDENT` |
+| **Student (MIT Pune)** | Divyanshi Mittal | `divyanshi@homesetu.com` | `123456` | `STUDENT` |
+| **Student (Pune Univ)** | Manasvi Sharma | `manasvi@homesetu.com` | `123456` | `STUDENT` |
 | **PG Owner (Kothrud)** | Ramesh Kothrud | `ramesh@pgowner.com` | `123456` | `OWNER` |
 | **PG Owner (Baner)** | Sunita Patil | `sunita@pgowner.com` | `123456` | `OWNER` |
 | **Platform Admin** | Admin | `admin@homesetu.com` | `admin123` | `ADMIN` |

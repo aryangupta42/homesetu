@@ -64,22 +64,30 @@ export default function AuthModal({ onClose }) {
           <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> Quick 1-Click Evaluation Logins:
           </span>
-          <div className="grid grid-cols-3 gap-1.5 text-xs">
+          <div className="grid grid-cols-4 gap-1.5 text-xs">
+            <button
+              onClick={() => handleQuickDemo('leader')}
+              className="py-1.5 px-1 bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 rounded-lg border border-amber-500/40 font-semibold transition-colors text-center truncate"
+              title="Arsh Mittal (Team Leader)"
+            >
+              Arsh 👑
+            </button>
             <button
               onClick={() => handleQuickDemo('student')}
-              className="py-1.5 px-2 bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 rounded-lg border border-amber-500/40 font-semibold transition-colors text-center truncate"
+              className="py-1.5 px-1 bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 rounded-lg border border-amber-500/40 font-semibold transition-colors text-center truncate"
+              title="Aryan Gupta (Student)"
             >
-              Aryan (Student)
+              Aryan
             </button>
             <button
               onClick={() => handleQuickDemo('owner')}
-              className="py-1.5 px-2 bg-orange-500/20 hover:bg-orange-500 hover:text-white text-orange-300 rounded-lg border border-orange-500/40 font-semibold transition-colors text-center truncate"
+              className="py-1.5 px-1 bg-orange-500/20 hover:bg-orange-500 hover:text-white text-orange-300 rounded-lg border border-orange-500/40 font-semibold transition-colors text-center truncate"
             >
-              Ramesh (Owner)
+              Owner
             </button>
             <button
               onClick={() => handleQuickDemo('admin')}
-              className="py-1.5 px-2 bg-purple-500/20 hover:bg-purple-500 hover:text-white text-purple-300 rounded-lg border border-purple-500/40 font-semibold transition-colors text-center truncate"
+              className="py-1.5 px-1 bg-purple-500/20 hover:bg-purple-500 hover:text-white text-purple-300 rounded-lg border border-purple-500/40 font-semibold transition-colors text-center truncate"
             >
               Admin
             </button>

@@ -4,26 +4,45 @@ import { api } from '../api';
 const AuthContext = createContext();
 
 export const DEMO_USERS = {
-  student: {
+  leader: {
     id: 1,
-    fullName: "Aryan Gupta",
-    email: "aryan@homesetu.com",
-    role: "STUDENT",
-    phone: "+91 98765 43210",
-    college: "College of Engineering Pune (COEP)",
-    city: "Pune"
-  },
-  student2: {
-    id: 2,
     fullName: "Arsh Mittal",
     email: "arsh@homesetu.com",
     role: "STUDENT",
-    phone: "+91 98765 43211",
+    phone: "+91 87553 59505",
     college: "Symbiosis International University",
+    city: "Pune",
+    isLeader: true
+  },
+  student: {
+    id: 2,
+    fullName: "Aryan Gupta",
+    email: "aryan@homesetu.com",
+    role: "STUDENT",
+    phone: "+91 95558 99137",
+    college: "College of Engineering Pune (COEP)",
+    city: "Pune"
+  },
+  student3: {
+    id: 3,
+    fullName: "Divyanshi Mittal",
+    email: "divyanshi@homesetu.com",
+    role: "STUDENT",
+    phone: "+91 93898 73080",
+    college: "MIT World Peace University",
+    city: "Pune"
+  },
+  student4: {
+    id: 4,
+    fullName: "Manasvi Sharma",
+    email: "manasvi@homesetu.com",
+    role: "STUDENT",
+    phone: "+91 72480 27977",
+    college: "Savitribai Phule Pune University",
     city: "Pune"
   },
   owner: {
-    id: 4,
+    id: 10,
     fullName: "Ramesh Kothrud",
     email: "ramesh@pgowner.com",
     role: "OWNER",
@@ -41,10 +60,10 @@ export const DEMO_USERS = {
 };
 
 export function AuthProvider({ children }) {
-  // Default to student demo user for instant smooth experience
+  // Default to Arsh Mittal (Team Leader) demo user
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('homesetu_user');
-    return saved ? JSON.parse(saved) : DEMO_USERS.student;
+    return saved ? JSON.parse(saved) : DEMO_USERS.leader;
   });
 
   useEffect(() => {

@@ -3,9 +3,10 @@ import { Home, Heart, Mail, Shield, CheckCircle2, Sparkles, MapPin, Code2 } from
 
 export default function Footer() {
   const teamMembers = [
-    { name: "Aryan Gupta", email: "aryanguptaji686@gmail.com", role: "Team Lead & Full-Stack" },
-    { name: "Arsh Mittal", email: "arshm2772@gmail.com", role: "Backend & System Design" },
-    { name: "Archana", email: "archanabayee@gmail.com", role: "Frontend & UI/UX" }
+    { name: "Arsh Mittal", role: "👑 Team Leader", phone: "+91 87553 59505", email: "arshm2772@gmail.com" },
+    { name: "Aryan Gupta", role: "Full-Stack Developer", phone: "+91 95558 99137", email: "aryanguptaji686@gmail.com" },
+    { name: "Divyanshi Mittal", role: "Backend & Database", phone: "+91 93898 73080", email: "divyanshi@homesetu.com" },
+    { name: "Manasvi Sharma", role: "Frontend & UI/UX", phone: "+91 72480 27977", email: "manasvi@homesetu.com" }
   ];
 
   const futureScopeItems = [
@@ -69,14 +70,19 @@ export default function Footer() {
             <span className="text-xs font-bold uppercase tracking-wider text-amber-400 block">
               Developed by TEAM - ByteBros (Slide 1)
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {teamMembers.map((m, i) => (
                 <div key={i} className="p-3.5 rounded-xl bg-[#0a272e] border border-teal-800/60 text-xs space-y-1">
-                  <div className="font-bold text-white text-sm">{m.name}</div>
-                  <div className="text-[11px] text-amber-400/90">{m.role}</div>
-                  <a href={`mailto:${m.email}`} className="text-[10px] text-teal-300/70 hover:text-white truncate block">
-                    {m.email}
-                  </a>
+                  <div className="font-bold text-white text-sm flex items-center justify-between">
+                    <span>{m.name}</span>
+                  </div>
+                  <div className="text-[11px] text-amber-400/90 font-medium">{m.role}</div>
+                  <div className="text-[11px] text-teal-300/80 font-mono">📞 {m.phone}</div>
+                  {m.email && (
+                    <a href={`mailto:${m.email}`} className="text-[10px] text-teal-300/70 hover:text-white truncate block">
+                      {m.email}
+                    </a>
+                  )}
                 </div>
               ))}
             </div>

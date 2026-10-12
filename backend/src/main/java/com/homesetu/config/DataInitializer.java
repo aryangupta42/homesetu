@@ -36,33 +36,43 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("🌱 Initializing HomeSetu Seed Data matching Presentation...");
 
         // 1. Users
-        User aryan = userRepository.save(new User(
-                "Aryan Gupta",
-                "aryan@homesetu.com",
-                "123456",
-                "STUDENT",
-                "+91 98765 43210",
-                "College of Engineering Pune (COEP)",
-                "Pune"
-        ));
-
         User arsh = userRepository.save(new User(
                 "Arsh Mittal",
                 "arsh@homesetu.com",
                 "123456",
                 "STUDENT",
-                "+91 98765 43211",
+                "+91 87553 59505",
                 "Symbiosis International University",
                 "Pune"
         ));
 
-        User archana = userRepository.save(new User(
-                "Archana",
-                "archana@homesetu.com",
+        User aryan = userRepository.save(new User(
+                "Aryan Gupta",
+                "aryan@homesetu.com",
                 "123456",
                 "STUDENT",
-                "+91 98765 43212",
+                "+91 95558 99137",
+                "College of Engineering Pune (COEP)",
+                "Pune"
+        ));
+
+        User divyanshi = userRepository.save(new User(
+                "Divyanshi Mittal",
+                "divyanshi@homesetu.com",
+                "123456",
+                "STUDENT",
+                "+91 93898 73080",
                 "MIT World Peace University",
+                "Pune"
+        ));
+
+        User manasvi = userRepository.save(new User(
+                "Manasvi Sharma",
+                "manasvi@homesetu.com",
+                "123456",
+                "STUDENT",
+                "+91 72480 27977",
+                "Savitribai Phule Pune University",
                 "Pune"
         ));
 
@@ -386,9 +396,9 @@ public class DataInitializer implements CommandLineRunner {
 
         reviewRepository.save(new Review(
                 pg1.getId(),
-                archana.getId(),
-                archana.getFullName(),
-                archana.getCollege(),
+                divyanshi.getId(),
+                divyanshi.getFullName(),
+                divyanshi.getCollege(),
                 4,
                 "Ramesh uncle is very helpful. Distance to MIT is just a 10 min walk.",
                 4, 4, 5

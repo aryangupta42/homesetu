@@ -300,7 +300,7 @@ const INITIAL_REVIEWS = {
     },
     {
       id: 2,
-      studentName: "Archana",
+      studentName: "Divyanshi Mittal",
       studentCollege: "MIT World Peace University",
       rating: 4,
       comment: "Ramesh uncle is very helpful. Distance to MIT is just a 10 min walk.",
@@ -333,20 +333,30 @@ export const api = {
     }
 
     // Local fallback
-    if (email === "aryan@homesetu.com") {
+    if (email === "arsh@homesetu.com") {
       return {
         success: true,
-        user: { id: 1, fullName: "Aryan Gupta", email, role: "STUDENT", college: "COEP Pune", phone: "+91 98765 43210" }
+        user: { id: 1, fullName: "Arsh Mittal", email, role: "STUDENT", college: "Symbiosis Pune", phone: "+91 87553 59505", isLeader: true }
       };
-    } else if (email === "arsh@homesetu.com") {
+    } else if (email === "aryan@homesetu.com") {
       return {
         success: true,
-        user: { id: 2, fullName: "Arsh Mittal", email, role: "STUDENT", college: "Symbiosis Pune", phone: "+91 98765 43211" }
+        user: { id: 2, fullName: "Aryan Gupta", email, role: "STUDENT", college: "COEP Pune", phone: "+91 95558 99137" }
+      };
+    } else if (email === "divyanshi@homesetu.com") {
+      return {
+        success: true,
+        user: { id: 3, fullName: "Divyanshi Mittal", email, role: "STUDENT", college: "MIT Pune", phone: "+91 93898 73080" }
+      };
+    } else if (email === "manasvi@homesetu.com") {
+      return {
+        success: true,
+        user: { id: 4, fullName: "Manasvi Sharma", email, role: "STUDENT", college: "Pune University", phone: "+91 72480 27977" }
       };
     } else if (email === "ramesh@pgowner.com") {
       return {
         success: true,
-        user: { id: 4, fullName: "Ramesh Kothrud", email, role: "OWNER", city: "Pune", phone: "+91 91234 56789" }
+        user: { id: 10, fullName: "Ramesh Kothrud", email, role: "OWNER", city: "Pune", phone: "+91 91234 56789" }
       };
     } else if (email === "admin@homesetu.com") {
       return {
