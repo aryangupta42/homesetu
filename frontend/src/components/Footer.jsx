@@ -2,12 +2,6 @@ import React from 'react';
 import { Home, Heart, Mail, Shield, CheckCircle2, Sparkles, MapPin, Code2 } from 'lucide-react';
 
 export default function Footer() {
-  const teamMembers = [
-    { name: "Arsh Mittal", isLeader: true, phone: "+91 87553 59505" },
-    { name: "Aryan Gupta", isLeader: false, phone: "+91 95558 99137" },
-    { name: "Divyanshi Mittal", isLeader: false, phone: "+91 93898 73080" },
-    { name: "Manasvi Sharma", isLeader: false, phone: "+91 72480 27977" }
-  ];
 
   const futureScopeItems = [
     "Preference-based PG recommendation engine",
@@ -65,25 +59,37 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Team ByteBros */}
+          {/* Platform Highlights */}
           <div className="md:col-span-7 space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-400 block">
-              Developed by TEAM - ByteBros
+              Platform Features & Highlights
             </span>
-            <ul className="space-y-2 text-xs sm:text-sm text-teal-200">
-              {teamMembers.map((m, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                  <span className="font-semibold text-white">{m.name}</span>
-                  {m.isLeader && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold">
-                      Team Leader
-                    </span>
-                  )}
-                  <span className="text-xs text-teal-300/70 font-mono">({m.phone})</span>
-                </li>
-              ))}
-            </ul>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs text-teal-200">
+              <div className="p-3 rounded-xl bg-[#0a272e] border border-teal-800/60">
+                <span className="font-semibold text-white block">0% Brokerage</span>
+                <span className="text-[11px] text-teal-300/70">Direct Student Connect</span>
+              </div>
+              <div className="p-3 rounded-xl bg-[#0a272e] border border-teal-800/60">
+                <span className="font-semibold text-white block">Verified Stays</span>
+                <span className="text-[11px] text-teal-300/70">100% Genuine Accommodations</span>
+              </div>
+              <div className="p-3 rounded-xl bg-[#0a272e] border border-teal-800/60">
+                <span className="font-semibold text-white block">Instant Confirmation ID</span>
+                <span className="text-[11px] text-teal-300/70">Structured Booking Flow</span>
+              </div>
+              <div className="p-3 rounded-xl bg-[#0a272e] border border-teal-800/60">
+                <span className="font-semibold text-white block">Live Bed Availability</span>
+                <span className="text-[11px] text-teal-300/70">Real-Time Vacancy Count</span>
+              </div>
+              <div className="p-3 rounded-xl bg-[#0a272e] border border-teal-800/60">
+                <span className="font-semibold text-white block">Side-by-Side Compare</span>
+                <span className="text-[11px] text-teal-300/70">12+ Parameter Evaluation</span>
+              </div>
+              <div className="p-3 rounded-xl bg-[#0a272e] border border-teal-800/60">
+                <span className="font-semibold text-white block">Complete Transparency</span>
+                <span className="text-[11px] text-teal-300/70">Upfront Rents & Rules</span>
+              </div>
+            </div>
           </div>
         </div>
 

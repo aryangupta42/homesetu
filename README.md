@@ -12,15 +12,6 @@
 
 ---
 
-## 👥 Project Team — ByteBros
-
-* **Arsh Mittal** *(Team Leader)* • `+91 87553 59505`
-* **Aryan Gupta** • `+91 95558 99137`
-* **Divyanshi Mittal** • `+91 93898 73080`
-* **Manasvi Sharma** • `+91 72480 27977`
-
----
-
 ## 🎯 Problem Statement & Motivation
 
 Moving to a new city for higher education starts with one crucial question: **"Where will I stay?"**
