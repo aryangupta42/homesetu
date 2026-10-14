@@ -41,7 +41,11 @@ export default function App() {
   // Modals state
   const [selectedPg, setSelectedPg] = useState(null);
   const [showCompareModal, setShowCompareModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalConfig, setAuthModalConfig] = useState({ isOpen: false, mode: 'login', role: 'STUDENT' });
+
+  const openAuthModal = (mode = 'login', role = 'STUDENT') => {
+    setAuthModalConfig({ isOpen: true, mode, role });
+  };
 
   useEffect(() => {
     fetchPgs();
@@ -94,7 +98,7 @@ export default function App() {
           setActiveTab={setActiveTab}
           compareList={compareList}
           openCompareModal={() => setShowCompareModal(true)}
-          openAuthModal={() => setShowAuthModal(true)}
+          openAuthModal={openAuthModal}
         />
 
         {/* Main Content Area based on activeTab */}
@@ -234,8 +238,17 @@ export default function App() {
         )}
 
         {/* Modal: Login & Registration */}
-        {showAuthModal && (
-          <AuthModal onClose={() => setShowAuthModal(false)} />
+        {authModalConfig.isOpen && (
+          <AuthModal
+            initialMode={authModalConfig.mode}
+            initialRole={authModalConfig.role}
+            onClose={() => setAuthModalConfig(prev => ({ ...prev, isOpen: false }))}
+            onAuthSuccess={(user) => {
+              if (user.role === 'STUDENT') setActiveTab('student-dashboard');
+              else if (user.role === 'OWNER') setActiveTab('owner-dashboard');
+              else if (user.role === 'ADMIN') setActiveTab('admin');
+            }}
+          />
         )}
       </div>
     </AuthProvider>

@@ -24,6 +24,32 @@ export default function StudentDashboard({ onExploreClick }) {
     setVisits(visitList);
   };
 
+  // If not student, show role management notification
+  if (currentUser && currentUser.role !== 'STUDENT') {
+    return (
+      <div className="py-16 px-4 max-w-2xl mx-auto text-center space-y-5 text-white">
+        <div className="w-16 h-16 rounded-2xl bg-teal-500/20 text-teal-300 flex items-center justify-center mx-auto border border-teal-500/40 text-2xl font-bold">
+          🎓
+        </div>
+        <h3 className="text-2xl font-bold">Student Dashboard — Student Role Only</h3>
+        <p className="text-sm text-teal-300/80 leading-relaxed">
+          Proper management governance is active. You are currently logged in as <strong>{currentUser.fullName} ({currentUser.role})</strong>. Student booking requests and personal visit passes belong to student accounts.
+        </p>
+        <button
+          onClick={() => {
+            const role = currentUser.role;
+            if (role === 'OWNER') onExploreClick('owner-dashboard');
+            else if (role === 'ADMIN') onExploreClick('admin');
+            else onExploreClick('explore');
+          }}
+          className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg transition-colors"
+        >
+          Go to {currentUser.role === 'ADMIN' ? 'Admin Portal' : 'Owner Dashboard'}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-8 text-white">
       {/* Student Profile Overview Card */}

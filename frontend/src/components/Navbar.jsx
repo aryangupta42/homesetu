@@ -162,7 +162,7 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
                     </p>
                     <div className="grid grid-cols-3 gap-1.5">
                       <button
-                        onClick={() => { switchUserRole('student'); setShowUserDropdown(false); }}
+                        onClick={() => { switchUserRole('student'); setActiveTab('student-dashboard'); setShowUserDropdown(false); }}
                         className={`text-[11px] py-1.5 px-1 rounded-lg text-center font-medium transition-all ${
                           currentUser.role === 'STUDENT'
                             ? 'bg-amber-500 text-slate-950 font-bold shadow'
@@ -173,7 +173,7 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
                         🎓 Student
                       </button>
                       <button
-                        onClick={() => { switchUserRole('owner'); setShowUserDropdown(false); }}
+                        onClick={() => { switchUserRole('owner'); setActiveTab('owner-dashboard'); setShowUserDropdown(false); }}
                         className={`text-[11px] py-1.5 px-1 rounded-lg text-center font-medium transition-all ${
                           currentUser.role === 'OWNER'
                             ? 'bg-orange-500 text-white font-bold shadow'
@@ -184,7 +184,7 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
                         🏢 Owner
                       </button>
                       <button
-                        onClick={() => { switchUserRole('admin'); setShowUserDropdown(false); }}
+                        onClick={() => { switchUserRole('admin'); setActiveTab('admin'); setShowUserDropdown(false); }}
                         className={`text-[11px] py-1.5 px-1 rounded-lg text-center font-medium transition-all ${
                           currentUser.role === 'ADMIN'
                             ? 'bg-purple-600 text-white font-bold shadow'
@@ -199,7 +199,12 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
 
                   <div className="border-t border-teal-800/60 mt-2 pt-1">
                     <button
-                      onClick={() => { logout(); setShowUserDropdown(false); }}
+                      onClick={() => {
+                        logout();
+                        setActiveTab('explore');
+                        setShowUserDropdown(false);
+                        openAuthModal('login', 'STUDENT');
+                      }}
                       className="w-full text-left px-4 py-2 hover:bg-red-950/40 text-red-300 hover:text-red-200 flex items-center gap-2 text-xs"
                     >
                       <LogOut className="w-3.5 h-3.5" />
@@ -210,12 +215,20 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
               )}
             </div>
           ) : (
-            <button
-              onClick={openAuthModal}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-semibold text-sm transition-all shadow-md shadow-amber-500/20"
-            >
-              Sign In
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => openAuthModal('login', 'STUDENT')}
+                className="px-3.5 py-1.5 rounded-xl bg-teal-900/70 hover:bg-teal-800 text-teal-200 border border-teal-700/60 font-semibold text-xs sm:text-sm transition-all"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => openAuthModal('register', 'STUDENT')}
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-md shadow-amber-500/20"
+              >
+                Create Account
+              </button>
+            </div>
           )}
 
           {/* Quick Dashboard shortcut button */}

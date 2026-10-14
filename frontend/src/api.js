@@ -993,11 +993,81 @@ export const api = {
       role: userData.role || "STUDENT",
       phone: userData.phone || "+91 98765 00000",
       college: userData.college || "",
+      studentId: userData.studentId || "",
       city: userData.city || "Pune",
-      isVerified: userData.role === 'OWNER' ? false : true, // PG owners start unverified until Admin approves!
+      isVerified: userData.role === 'OWNER' ? false : true,
       verificationStatus: userData.role === 'OWNER' ? 'PENDING' : 'VERIFIED',
-      propertyName: userData.propertyName || ""
+      propertyName: userData.propertyName || "",
+      address: userData.address || "",
+      verificationDoc: userData.verificationDoc || "electricity_bill_deed.pdf"
     };
+
+    // If a new PG Owner registers, auto-queue their PG listing for Admin verification
+    if (newUser.role === 'OWNER' && newUser.propertyName) {
+      const ownerPg = {
+        id: Date.now(),
+        name: newUser.propertyName,
+        tagline: "Student Living in " + (newUser.address || "Prime Location"),
+        city: newUser.city || "Pune",
+        locality: newUser.address ? newUser.address.split(',')[0] : "Central",
+        address: newUser.address || "Main Street, Student Area",
+        pincode: "411038",
+        nearbyColleges: "Top City Engineering & Management Campuses (1.2 km)",
+        genderType: "COED",
+        monthlyRent: 8500,
+        securityDeposit: 17000,
+        foodIncluded: true,
+        foodType: "Veg & Non-Veg",
+        hasAc: true,
+        hasWifi: true,
+        hasLaundry: true,
+        hasAttachedBath: true,
+        hasCctv: true,
+        hasPowerBackup: true,
+        hasGym: false,
+        description: `Newly listed property by host ${newUser.fullName}. Furnished rooms, high-speed Wi-Fi, and verified security.`,
+        houseRules: "Gate closing at 10:30 PM. Clean study hours.",
+        noticePeriodDays: 30,
+        gateClosingTime: "10:30 PM",
+        totalRooms: 12,
+        availableRooms: 6,
+        isVerified: false,
+        verificationStatus: "PENDING",
+        verificationDossier: {
+          propertyDocType: "Uploaded Electricity Meter Bill & Ownership Proof",
+          propertyDocNumber: "EB-" + Math.floor(100000 + Math.random() * 900000),
+          ownerGovtIdType: "Uploaded Aadhaar / Govt ID Proof",
+          ownerGovtIdNumber: "XXXX-XXXX-" + Math.floor(1000 + Math.random() * 9000),
+          uploadedDocumentFile: newUser.verificationDoc,
+          fireSafetyCertified: true,
+          policeVerificationStatus: "Pending Admin Audit",
+          submittedAt: new Date().toISOString().split('T')[0],
+          adminNotes: "Newly submitted host registration. Review uploaded documents to grant Verified Badge."
+        },
+        messMenu: {
+          breakfast: "Poha, Aloo Paratha, Milk / Tea",
+          lunch: "Dal, Paneer / Veg, Steamed Rice, Phulkas",
+          dinner: "Dal Tadka, Rice, Tawa Roti, Dessert",
+          dietOption: "Veg & Non-Veg"
+        },
+        commuteTimes: {
+          walk: "8 mins",
+          cycle: "3 mins",
+          bus: "5 mins"
+        },
+        rating: 4.8,
+        totalReviews: 1,
+        coverImage: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
+        images: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
+        ownerId: newUser.id,
+        ownerName: newUser.fullName,
+        ownerPhone: newUser.phone,
+        ownerEmail: newUser.email
+      };
+
+      mockPgs.unshift(ownerPg);
+      savePgsToStorage();
+    }
 
     const registeredUsers = JSON.parse(localStorage.getItem('homesetu_registered_users') || '[]');
     registeredUsers.push(newUser);

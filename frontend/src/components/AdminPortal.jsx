@@ -439,6 +439,16 @@ export default function AdminPortal() {
                 <span className="text-[10px] uppercase font-bold text-teal-400">Electricity Meter / Property Title Doc</span>
                 <div className="text-white font-semibold">{selectedPgDossier.verificationDossier?.propertyDocType || "Electricity Meter & Ownership Deed"}</div>
                 <div className="text-emerald-300 font-mono">Registry ID: {selectedPgDossier.verificationDossier?.propertyDocNumber || "EB-PUN-2026-8812"}</div>
+                {selectedPgDossier.verificationDossier?.uploadedDocumentFile && (
+                  <div className="mt-2 p-2.5 rounded-lg bg-[#061e23] border border-teal-700/80 flex items-center justify-between">
+                    <span className="text-teal-200 font-mono flex items-center gap-1.5">
+                      📄 {selectedPgDossier.verificationDossier.uploadedDocumentFile}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-900/80 text-emerald-300 text-[10px] font-bold border border-emerald-700">
+                      Uploaded File Verified
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
