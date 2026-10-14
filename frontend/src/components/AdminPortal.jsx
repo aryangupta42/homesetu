@@ -3,8 +3,8 @@ import { ShieldCheck, ShieldAlert, Users, Building, FileCheck, CheckCircle2, XCi
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 
-export default function AdminPortal() {
-  const { currentUser, switchUserRole } = useAuth();
+export default function AdminPortal({ openAuthModal, onExploreClick }) {
+  const { currentUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('verifications'); // 'verifications' | 'bookings' | 'visits' | 'users'
   const [stats, setStats] = useState({
     totalUsers: 16,
@@ -54,23 +54,63 @@ export default function AdminPortal() {
     loadData();
   };
 
-  // Proper Management Governance: If not admin, restrict access
-  if (currentUser && currentUser.role !== 'ADMIN') {
+  // Case 1: Unauthenticated visitor
+  if (!currentUser) {
     return (
-      <div className="py-16 px-4 max-w-2xl mx-auto text-center space-y-5 text-white">
-        <div className="w-16 h-16 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center mx-auto border border-purple-500/40">
-          <ShieldAlert className="w-8 h-8" />
+      <div className="py-20 px-4 max-w-xl mx-auto text-center space-y-6 text-white animate-in fade-in duration-200">
+        <div className="w-20 h-20 rounded-3xl bg-purple-500/10 text-purple-400 border border-purple-500/30 flex items-center justify-center text-4xl mx-auto shadow-xl">
+          🛡️
         </div>
-        <h3 className="text-2xl font-bold">Admin Portal — Access Restricted</h3>
-        <p className="text-sm text-teal-300/80 leading-relaxed">
-          Proper management governance is strictly enforced. You are currently logged in as <strong>{currentUser.fullName} ({currentUser.role})</strong>. Only authorized Platform Administrators can verify PG owner documents, grant official trust badges, and manage dispute resolutions.
+        <div>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white">Admin Verification Portal</h3>
+          <p className="text-xs uppercase font-bold tracking-widest text-purple-400 mt-1">Authorized Access Only</p>
+        </div>
+        <p className="text-sm text-teal-200/80 leading-relaxed max-w-md mx-auto">
+          This portal is protected and requires platform administrator credentials to verify PG documents, grant safety badges, and audit platform activities.
         </p>
-        <button
-          onClick={() => switchUserRole('admin')}
-          className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg transition-colors"
-        >
-          Switch to Admin Persona
-        </button>
+        <div className="pt-2">
+          <button
+            onClick={() => openAuthModal && openAuthModal('login', 'ADMIN')}
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-xl transition-all"
+          >
+            Sign In with Admin Credentials
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Case 2: Logged in as non-admin
+  if (currentUser.role !== 'ADMIN') {
+    return (
+      <div className="py-20 px-4 max-w-xl mx-auto text-center space-y-6 text-white animate-in fade-in duration-200">
+        <div className="w-20 h-20 rounded-3xl bg-red-500/10 text-red-400 border border-red-500/30 flex items-center justify-center text-4xl mx-auto shadow-xl">
+          🔒
+        </div>
+        <div>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white">Access Restricted</h3>
+          <p className="text-xs uppercase font-bold tracking-widest text-red-400 mt-1">Platform Security Guard</p>
+        </div>
+        <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
+          Proper management governance is strictly enforced. You are currently logged in as <span className="font-bold text-amber-400">{currentUser.fullName} ({currentUser.role})</span>. Only verified Platform Administrators can access this portal.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => onExploreClick && onExploreClick(currentUser.role === 'OWNER' ? 'owner-dashboard' : 'student-dashboard')}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-teal-800 hover:bg-teal-700 text-white font-semibold text-xs transition-colors"
+          >
+            Back to My Portal
+          </button>
+          <button
+            onClick={() => {
+              logout();
+              if (openAuthModal) openAuthModal('login', 'ADMIN');
+            }}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-colors"
+          >
+            Sign Out & Log In as Admin
+          </button>
+        </div>
       </div>
     );
   }

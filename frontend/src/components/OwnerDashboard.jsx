@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
 import { Building, Plus, CheckCircle2, XCircle, Clock, Users, Bed, MapPin, IndianRupee, ShieldCheck, Check, X, FileText, AlertTriangle, Shield, UploadCloud } from 'lucide-react';
 
-export default function OwnerDashboard() {
-  const { currentUser, switchUserRole } = useAuth();
+export default function OwnerDashboard({ openAuthModal, onExploreClick }) {
+  const { currentUser, logout } = useAuth();
   const [requests, setRequests] = useState([]);
   const [listings, setListings] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -121,23 +121,69 @@ export default function OwnerDashboard() {
     alert(`New ${roomFormData.roomType} room added successfully to ${selectedPgForRoom.name}!`);
   };
 
-  // If not owner, show role management notification
-  if (currentUser && currentUser.role !== 'OWNER' && currentUser.role !== 'ADMIN') {
+  // Case 1: Unauthenticated visitor
+  if (!currentUser) {
     return (
-      <div className="py-16 px-4 max-w-2xl mx-auto text-center space-y-5 text-white">
-        <div className="w-16 h-16 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center mx-auto border border-orange-500/40">
-          <Building className="w-8 h-8" />
+      <div className="py-20 px-4 max-w-xl mx-auto text-center space-y-6 text-white animate-in fade-in duration-200">
+        <div className="w-20 h-20 rounded-3xl bg-orange-500/10 text-orange-400 border border-orange-500/30 flex items-center justify-center text-4xl mx-auto shadow-xl">
+          🏢
         </div>
-        <h3 className="text-2xl font-bold">PG Owner Dashboard — Restricted Access</h3>
-        <p className="text-sm text-teal-300/80 leading-relaxed">
-          Proper management governance is active. You are currently logged in as a <strong>Student ({currentUser.fullName})</strong>. Only registered PG Owners and Admins can manage properties, room inventories, and booking approvals.
+        <div>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white">PG Owner Portal</h3>
+          <p className="text-xs uppercase font-bold tracking-widest text-orange-400 mt-1">Authentication Required</p>
+        </div>
+        <p className="text-sm text-teal-200/80 leading-relaxed max-w-md mx-auto">
+          This portal is strictly reserved for registered PG Property Owners to manage listings, room inventory, document verification, and booking requests.
         </p>
-        <button
-          onClick={() => switchUserRole('owner')}
-          className="px-6 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold text-xs shadow-lg transition-colors"
-        >
-          Switch to PG Owner Persona
-        </button>
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => openAuthModal && openAuthModal('login', 'OWNER')}
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-bold text-sm shadow-xl transition-all"
+          >
+            Sign In as PG Owner
+          </button>
+          <button
+            onClick={() => openAuthModal && openAuthModal('register', 'OWNER')}
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-teal-900/60 hover:bg-teal-800 text-teal-200 border border-teal-700/60 font-semibold text-sm transition-all"
+          >
+            Register New PG
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Case 2: Logged in as Student (Strict RBAC Boundary)
+  if (currentUser.role !== 'OWNER' && currentUser.role !== 'ADMIN') {
+    return (
+      <div className="py-20 px-4 max-w-xl mx-auto text-center space-y-6 text-white animate-in fade-in duration-200">
+        <div className="w-20 h-20 rounded-3xl bg-red-500/10 text-red-400 border border-red-500/30 flex items-center justify-center text-4xl mx-auto shadow-xl">
+          🔒
+        </div>
+        <div>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white">Access Restricted</h3>
+          <p className="text-xs uppercase font-bold tracking-widest text-red-400 mt-1">Role Boundary Enforced</p>
+        </div>
+        <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
+          You are currently signed in as a <span className="font-bold text-amber-400">Student ({currentUser.fullName})</span>. Students cannot access PG Owner management tools or property settings.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => onExploreClick && onExploreClick('student-dashboard')}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-teal-800 hover:bg-teal-700 text-white font-semibold text-xs transition-colors"
+          >
+            Back to Student Dashboard
+          </button>
+          <button
+            onClick={() => {
+              logout();
+              if (openAuthModal) openAuthModal('login', 'OWNER');
+            }}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-bold text-xs transition-colors"
+          >
+            Sign Out & Log In as Owner
+          </button>
+        </div>
       </div>
     );
   }

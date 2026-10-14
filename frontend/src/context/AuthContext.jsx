@@ -33,10 +33,10 @@ export const DEMO_USERS = {
 };
 
 export function AuthProvider({ children }) {
-  // Default to student demo user
+  // Start logged out by default unless an active session is saved in localStorage
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('homesetu_user');
-    return saved ? JSON.parse(saved) : DEMO_USERS.student;
+    return saved ? JSON.parse(saved) : null;
   });
 
   useEffect(() => {
@@ -47,13 +47,13 @@ export function AuthProvider({ children }) {
     }
   }, [currentUser]);
 
-  const login = async (email, password) => {
-    const res = await api.login(email, password);
+  const login = async (email, password, expectedRole = null) => {
+    const res = await api.login(email, password, expectedRole);
     if (res.success && res.user) {
       setCurrentUser(res.user);
-      return { success: true };
+      return { success: true, user: res.user };
     }
-    return { success: false, message: res.message || "Login failed" };
+    return { success: false, message: res.message || "Login failed. Invalid credentials." };
   };
 
   const register = async (userData) => {
@@ -67,16 +67,11 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setCurrentUser(null);
-  };
-
-  const switchUserRole = (roleKey) => {
-    if (DEMO_USERS[roleKey]) {
-      setCurrentUser(DEMO_USERS[roleKey]);
-    }
+    localStorage.removeItem('homesetu_user');
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, register, logout, switchUserRole }}>
+    <AuthContext.Provider value={{ currentUser, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -924,8 +924,8 @@ function saveVisitsToStorage() {
 }
 
 export const api = {
-  // Authentication
-  login: async (email, password) => {
+  // Authentication with Strict Credential & Role Verification
+  login: async (email, password, expectedRole = null) => {
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -937,40 +937,65 @@ export const api = {
       console.warn("Backend API not reachable, falling back to client-side auth:", e);
     }
 
-    // Check user registered in localStorage
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    // 1. Check user registered in localStorage
     const registeredUsers = JSON.parse(localStorage.getItem('homesetu_registered_users') || '[]');
-    const registeredMatch = registeredUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const registeredMatch = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
     if (registeredMatch) {
+      if (registeredMatch.password && registeredMatch.password !== cleanPassword) {
+        return { success: false, message: "Incorrect password. Please verify your password." };
+      }
+      if (expectedRole && registeredMatch.role !== expectedRole) {
+        return {
+          success: false,
+          message: `Access Denied: This account is registered as a ${registeredMatch.role}. Please login via the ${registeredMatch.role === 'STUDENT' ? 'Student' : registeredMatch.role === 'OWNER' ? 'PG Owner' : 'Admin'} portal.`
+        };
+      }
       return { success: true, user: registeredMatch };
     }
 
-    // Standard 3 Clean Personas
-    if (email === "student@homesetu.com") {
+    // 2. Pre-seeded Verified Accounts
+    if (cleanEmail === "student@homesetu.com") {
+      if (cleanPassword !== "123456") {
+        return { success: false, message: "Incorrect password. (Default demo student password is 123456)" };
+      }
+      if (expectedRole && expectedRole !== 'STUDENT') {
+        return { success: false, message: "Access Denied: student@homesetu.com is a Student account. Please login through the Student portal." };
+      }
       return {
         success: true,
-        user: { id: 1, fullName: "Rahul Verma", email, role: "STUDENT", college: "Pune Engineering College (COEP)", phone: "+91 98765 00001", city: "Pune" }
+        user: { id: 1, fullName: "Rahul Verma", email: "student@homesetu.com", role: "STUDENT", college: "Pune Engineering College (COEP)", phone: "+91 98765 00001", city: "Pune" }
       };
-    } else if (email === "owner@homesetu.com" || email === "ramesh@homesetu.com") {
+    } else if (cleanEmail === "owner@homesetu.com" || cleanEmail === "ramesh@homesetu.com") {
+      if (cleanPassword !== "123456") {
+        return { success: false, message: "Incorrect password. (Default demo owner password is 123456)" };
+      }
+      if (expectedRole && expectedRole !== 'OWNER') {
+        return { success: false, message: "Access Denied: owner@homesetu.com is a PG Owner account. Please login through the PG Owner portal." };
+      }
       return {
         success: true,
         user: { id: 10, fullName: "Ramesh Sharma", email: "owner@homesetu.com", role: "OWNER", city: "Pune", phone: "+91 91234 56789", isVerified: true }
       };
-    } else if (email === "sunita@homesetu.com") {
+    } else if (cleanEmail === "admin@homesetu.com") {
+      if (cleanPassword !== "admin123" && cleanPassword !== "ADMIN2026") {
+        return { success: false, message: "Incorrect password. (Default demo admin password is admin123)" };
+      }
+      if (expectedRole && expectedRole !== 'ADMIN') {
+        return { success: false, message: "Access Denied: admin@homesetu.com is an Administrator account. Please login through the Admin portal." };
+      }
       return {
         success: true,
-        user: { id: 11, fullName: "Sunita Patil", email, role: "OWNER", city: "Pune", phone: "+91 92345 67890", isVerified: true }
-      };
-    } else if (email === "admin@homesetu.com") {
-      return {
-        success: true,
-        user: { id: 99, fullName: "HomeSetu Admin", email, role: "ADMIN", city: "Pune", phone: "+91 99999 88888" }
+        user: { id: 99, fullName: "HomeSetu Admin", email: "admin@homesetu.com", role: "ADMIN", city: "Pune", phone: "+91 99999 88888" }
       };
     }
 
-    // Default student user for unrecognized email
+    // 3. Email not found - Strict Error
     return {
-      success: true,
-      user: { id: Date.now(), fullName: email.split('@')[0], email, role: "STUDENT", college: "City College", phone: "+91 98765 00000" }
+      success: false,
+      message: "No account found with this email. Please click 'Create Account' below to register first."
     };
   },
 
@@ -990,6 +1015,7 @@ export const api = {
       id: Date.now(),
       fullName: userData.fullName,
       email: userData.email,
+      password: userData.password,
       role: userData.role || "STUDENT",
       phone: userData.phone || "+91 98765 00000",
       college: userData.college || "",

@@ -41,9 +41,9 @@ export default function App() {
   // Modals state
   const [selectedPg, setSelectedPg] = useState(null);
   const [showCompareModal, setShowCompareModal] = useState(false);
-  const [authModalConfig, setAuthModalConfig] = useState({ isOpen: false, mode: 'login', role: 'STUDENT' });
+  const [authModalConfig, setAuthModalConfig] = useState({ isOpen: false, mode: 'login', role: null });
 
-  const openAuthModal = (mode = 'login', role = 'STUDENT') => {
+  const openAuthModal = (mode = 'login', role = null) => {
     setAuthModalConfig({ isOpen: true, mode, role });
   };
 
@@ -105,11 +105,12 @@ export default function App() {
         <main className="flex-1">
           {activeTab === 'explore' && (
             <div>
-              {/* Hero Section with Quick City Filter and Search */}
+              {/* Hero Section with Quick City Filter, Role Gateway, and Search */}
               <HeroSection
                 filters={filters}
                 setFilters={setFilters}
                 onSearchClick={fetchPgs}
+                openAuthModal={openAuthModal}
               />
 
               {/* Listings Search and Discovery Section */}
@@ -204,15 +205,24 @@ export default function App() {
           )}
 
           {activeTab === 'student-dashboard' && (
-            <StudentDashboard onExploreClick={() => setActiveTab('explore')} />
+            <StudentDashboard
+              onExploreClick={(tab) => setActiveTab(tab || 'explore')}
+              openAuthModal={openAuthModal}
+            />
           )}
 
           {activeTab === 'owner-dashboard' && (
-            <OwnerDashboard />
+            <OwnerDashboard
+              onExploreClick={(tab) => setActiveTab(tab || 'explore')}
+              openAuthModal={openAuthModal}
+            />
           )}
 
           {activeTab === 'admin' && (
-            <AdminPortal />
+            <AdminPortal
+              onExploreClick={(tab) => setActiveTab(tab || 'explore')}
+              openAuthModal={openAuthModal}
+            />
           )}
         </main>
 

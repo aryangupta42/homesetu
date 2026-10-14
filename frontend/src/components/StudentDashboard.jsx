@@ -4,8 +4,8 @@ import { api } from '../api';
 import { Clock, CheckCircle2, XCircle, FileText, MapPin, Calendar, IndianRupee, ShieldCheck, ArrowRight, User } from 'lucide-react';
 import ConfirmationSlipModal from './ConfirmationSlipModal';
 
-export default function StudentDashboard({ onExploreClick }) {
-  const { currentUser } = useAuth();
+export default function StudentDashboard({ onExploreClick, openAuthModal }) {
+  const { currentUser, logout } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [visits, setVisits] = useState([]);
   const [selectedBookingForSlip, setSelectedBookingForSlip] = useState(null);
@@ -24,28 +24,74 @@ export default function StudentDashboard({ onExploreClick }) {
     setVisits(visitList);
   };
 
-  // If not student, show role management notification
-  if (currentUser && currentUser.role !== 'STUDENT') {
+  // Case 1: Unauthenticated visitor
+  if (!currentUser) {
     return (
-      <div className="py-16 px-4 max-w-2xl mx-auto text-center space-y-5 text-white">
-        <div className="w-16 h-16 rounded-2xl bg-teal-500/20 text-teal-300 flex items-center justify-center mx-auto border border-teal-500/40 text-2xl font-bold">
+      <div className="py-20 px-4 max-w-xl mx-auto text-center space-y-6 text-white animate-in fade-in duration-200">
+        <div className="w-20 h-20 rounded-3xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center text-4xl mx-auto shadow-xl">
           🎓
         </div>
-        <h3 className="text-2xl font-bold">Student Dashboard — Student Role Only</h3>
-        <p className="text-sm text-teal-300/80 leading-relaxed">
-          Proper management governance is active. You are currently logged in as <strong>{currentUser.fullName} ({currentUser.role})</strong>. Student booking requests and personal visit passes belong to student accounts.
+        <div>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white">Student Portal</h3>
+          <p className="text-xs uppercase font-bold tracking-widest text-amber-400 mt-1">Sign In Required</p>
+        </div>
+        <p className="text-sm text-teal-200/80 leading-relaxed max-w-md mx-auto">
+          Sign in with your student credentials to view your real-time booking requests, scheduled PG walk-in visits, and official Confirmation Slips.
         </p>
-        <button
-          onClick={() => {
-            const role = currentUser.role;
-            if (role === 'OWNER') onExploreClick('owner-dashboard');
-            else if (role === 'ADMIN') onExploreClick('admin');
-            else onExploreClick('explore');
-          }}
-          className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg transition-colors"
-        >
-          Go to {currentUser.role === 'ADMIN' ? 'Admin Portal' : 'Owner Dashboard'}
-        </button>
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => openAuthModal && openAuthModal('login', 'STUDENT')}
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-sm shadow-xl transition-all"
+          >
+            Sign In as Student
+          </button>
+          <button
+            onClick={() => openAuthModal && openAuthModal('register', 'STUDENT')}
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-teal-900/60 hover:bg-teal-800 text-teal-200 border border-teal-700/60 font-semibold text-sm transition-all"
+          >
+            Create Student Account
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Case 2: Logged in as non-student (Strict RBAC Boundary)
+  if (currentUser.role !== 'STUDENT') {
+    return (
+      <div className="py-20 px-4 max-w-xl mx-auto text-center space-y-6 text-white animate-in fade-in duration-200">
+        <div className="w-20 h-20 rounded-3xl bg-red-500/10 text-red-400 border border-red-500/30 flex items-center justify-center text-4xl mx-auto shadow-xl">
+          🔒
+        </div>
+        <div>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white">Access Restricted</h3>
+          <p className="text-xs uppercase font-bold tracking-widest text-red-400 mt-1">Student Role Only</p>
+        </div>
+        <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
+          Proper management governance is active. You are currently logged in as <span className="font-bold text-amber-400">{currentUser.fullName} ({currentUser.role})</span>. Student booking requests and personal visit passes belong to student accounts.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => {
+              const role = currentUser.role;
+              if (role === 'OWNER') onExploreClick('owner-dashboard');
+              else if (role === 'ADMIN') onExploreClick('admin');
+              else onExploreClick('explore');
+            }}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-teal-800 hover:bg-teal-700 text-white font-semibold text-xs transition-colors"
+          >
+            Go to {currentUser.role === 'ADMIN' ? 'Admin Portal' : 'Owner Dashboard'}
+          </button>
+          <button
+            onClick={() => {
+              logout();
+              if (openAuthModal) openAuthModal('login', 'STUDENT');
+            }}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors"
+          >
+            Sign Out & Log In as Student
+          </button>
+        </div>
       </div>
     );
   }

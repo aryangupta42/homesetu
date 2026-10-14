@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, MapPin, IndianRupee, Users, ShieldCheck, Check, Sparkles } from 'lucide-react';
 
-export default function HeroSection({ filters, setFilters, onSearchClick }) {
+export default function HeroSection({ filters, setFilters, onSearchClick, openAuthModal }) {
   const cities = ["Pune", "Bengaluru", "Delhi", "Kota", "Mumbai"];
 
   const handleCitySelect = (cityName) => {
@@ -38,6 +38,60 @@ export default function HeroSection({ filters, setFilters, onSearchClick }) {
         <p className="mt-5 text-base sm:text-lg text-teal-200/80 max-w-2xl mx-auto leading-relaxed">
           HomeSetu bridges the gap between students and PG owners with complete transparency, verified listings, side-by-side comparisons, and guaranteed Confirmation IDs.
         </p>
+
+        {/* Role Selection Gateway Banner (As requested: pehle hi page puche as student, pg owner, admin) */}
+        <div className="mt-8 max-w-3xl mx-auto bg-[#0a2930]/90 border border-teal-700/50 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2 border-b border-teal-800/60">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">Strict Role Gateway</span>
+              <h3 className="text-sm sm:text-base font-extrabold text-white">Who Are You? Select Your Role to Enter:</h3>
+            </div>
+            <span className="text-[10px] text-teal-300/80 bg-teal-950/60 border border-teal-800/80 px-2 py-0.5 rounded-full font-mono">
+              Protected by ID & Password
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <button
+              onClick={() => openAuthModal && openAuthModal('login', 'STUDENT')}
+              className="p-3 rounded-xl bg-[#082227] hover:bg-[#12424b] border border-teal-700/50 hover:border-amber-400 transition-all text-left flex items-center gap-3 group shadow-md"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+                🎓
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">College Student</p>
+                <p className="text-[10px] text-teal-300/70">Find PGs & Bookings</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => openAuthModal && openAuthModal('login', 'OWNER')}
+              className="p-3 rounded-xl bg-[#082227] hover:bg-[#12424b] border border-teal-700/50 hover:border-orange-400 transition-all text-left flex items-center gap-3 group shadow-md"
+            >
+              <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+                🏢
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white group-hover:text-orange-300 transition-colors">PG Owner</p>
+                <p className="text-[10px] text-teal-300/70">Manage PGs & Requests</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => openAuthModal && openAuthModal('login', 'ADMIN')}
+              className="p-3 rounded-xl bg-[#082227] hover:bg-[#12424b] border border-teal-700/50 hover:border-purple-400 transition-all text-left flex items-center gap-3 group shadow-md"
+            >
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+                🛡️
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Administrator</p>
+                <p className="text-[10px] text-teal-300/70">Audit & Verify PGs</p>
+              </div>
+            </button>
+          </div>
+        </div>
 
         {/* City Quick Pills */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
