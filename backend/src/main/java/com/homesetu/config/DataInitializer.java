@@ -35,50 +35,20 @@ public class DataInitializer implements CommandLineRunner {
 
         System.out.println("🌱 Initializing HomeSetu Seed Data matching Presentation...");
 
-        // 1. Users
-        User arsh = userRepository.save(new User(
-                "Arsh Mittal",
-                "arsh@homesetu.com",
+        // 1. Users (3 Core Roles: Student, PG Owner, Admin)
+        User student = userRepository.save(new User(
+                "Rahul Verma",
+                "student@homesetu.com",
                 "123456",
                 "STUDENT",
-                "+91 87553 59505",
-                "Symbiosis International University",
-                "Pune"
-        ));
-
-        User aryan = userRepository.save(new User(
-                "Aryan Gupta",
-                "aryan@homesetu.com",
-                "123456",
-                "STUDENT",
-                "+91 95558 99137",
+                "+91 98765 00001",
                 "College of Engineering Pune (COEP)",
                 "Pune"
         ));
 
-        User divyanshi = userRepository.save(new User(
-                "Divyanshi Mittal",
-                "divyanshi@homesetu.com",
-                "123456",
-                "STUDENT",
-                "+91 93898 73080",
-                "MIT World Peace University",
-                "Pune"
-        ));
-
-        User manasvi = userRepository.save(new User(
-                "Manasvi Sharma",
-                "manasvi@homesetu.com",
-                "123456",
-                "STUDENT",
-                "+91 72480 27977",
-                "Savitribai Phule Pune University",
-                "Pune"
-        ));
-
         User rameshOwner = userRepository.save(new User(
-                "Ramesh Kothrud",
-                "ramesh@pgowner.com",
+                "Ramesh Sharma",
+                "owner@homesetu.com",
                 "123456",
                 "OWNER",
                 "+91 91234 56789",
@@ -88,7 +58,7 @@ public class DataInitializer implements CommandLineRunner {
 
         User sunitaOwner = userRepository.save(new User(
                 "Sunita Patil",
-                "sunita@pgowner.com",
+                "sunita@homesetu.com",
                 "123456",
                 "OWNER",
                 "+91 92345 67890",
@@ -315,13 +285,13 @@ public class DataInitializer implements CommandLineRunner {
         roomOptionRepository.save(new RoomOption(pg5.getId(), "Double Sharing", 8000.0, 10, 3, false, true));
 
         // 3. Pre-seeded Booking Requests
-        // 3.1 Accepted booking for Aryan Gupta with valid Confirmation ID
+        // 3.1 Accepted booking for Student with valid Confirmation ID
         BookingRequest b1 = new BookingRequest();
-        b1.setStudentId(aryan.getId());
-        b1.setStudentName(aryan.getFullName());
-        b1.setStudentEmail(aryan.getEmail());
-        b1.setStudentPhone(aryan.getPhone());
-        b1.setStudentCollege(aryan.getCollege());
+        b1.setStudentId(student.getId());
+        b1.setStudentName(student.getFullName());
+        b1.setStudentEmail(student.getEmail());
+        b1.setStudentPhone(student.getPhone());
+        b1.setStudentCollege(student.getCollege());
         b1.setPgListingId(pg1.getId());
         b1.setPgName(pg1.getName());
         b1.setPgCity(pg1.getCity());
@@ -339,13 +309,13 @@ public class DataInitializer implements CommandLineRunner {
         b1.setActionDate(LocalDateTime.now().minusDays(2));
         bookingRequestRepository.save(b1);
 
-        // 3.2 Pending booking for Aryan at Green Nest PG
+        // 3.2 Pending booking for Student at Green Nest PG
         BookingRequest b2 = new BookingRequest();
-        b2.setStudentId(aryan.getId());
-        b2.setStudentName(aryan.getFullName());
-        b2.setStudentEmail(aryan.getEmail());
-        b2.setStudentPhone(aryan.getPhone());
-        b2.setStudentCollege(aryan.getCollege());
+        b2.setStudentId(student.getId());
+        b2.setStudentName(student.getFullName());
+        b2.setStudentEmail(student.getEmail());
+        b2.setStudentPhone(student.getPhone());
+        b2.setStudentCollege(student.getCollege());
         b2.setPgListingId(pg2.getId());
         b2.setPgName(pg2.getName());
         b2.setPgCity(pg2.getCity());
@@ -361,34 +331,12 @@ public class DataInitializer implements CommandLineRunner {
         b2.setCreatedAt(LocalDateTime.now().minusHours(4));
         bookingRequestRepository.save(b2);
 
-        // 3.3 Pending booking from Arsh Mittal to Ramesh PG (so Ramesh can test Accept/Reject!)
-        BookingRequest b3 = new BookingRequest();
-        b3.setStudentId(arsh.getId());
-        b3.setStudentName(arsh.getFullName());
-        b3.setStudentEmail(arsh.getEmail());
-        b3.setStudentPhone(arsh.getPhone());
-        b3.setStudentCollege(arsh.getCollege());
-        b3.setPgListingId(pg1.getId());
-        b3.setPgName(pg1.getName());
-        b3.setPgCity(pg1.getCity());
-        b3.setPgLocality(pg1.getLocality());
-        b3.setOwnerId(pg1.getOwnerId());
-        b3.setRoomType("Single Sharing");
-        b3.setMonthlyRent(11500.0);
-        b3.setMoveInDate(LocalDate.now().plusDays(8));
-        b3.setDurationMonths(12);
-        b3.setMessage("Hi, I study at Symbiosis and want to book the single room.");
-        b3.setStatus("PENDING");
-        b3.setConfirmationId(null);
-        b3.setCreatedAt(LocalDateTime.now().minusHours(1));
-        bookingRequestRepository.save(b3);
-
         // 4. Pre-seeded Reviews
         reviewRepository.save(new Review(
                 pg1.getId(),
-                aryan.getId(),
-                aryan.getFullName(),
-                aryan.getCollege(),
+                student.getId(),
+                student.getFullName(),
+                student.getCollege(),
                 5,
                 "Extremely clean and peaceful place to study. Food tastes just like home. Wi-Fi speed is top notch!",
                 5, 5, 5
@@ -396,9 +344,9 @@ public class DataInitializer implements CommandLineRunner {
 
         reviewRepository.save(new Review(
                 pg1.getId(),
-                divyanshi.getId(),
-                divyanshi.getFullName(),
-                divyanshi.getCollege(),
+                student.getId(),
+                "Priya Sen",
+                "MIT World Peace University",
                 4,
                 "Ramesh uncle is very helpful. Distance to MIT is just a 10 min walk.",
                 4, 4, 5

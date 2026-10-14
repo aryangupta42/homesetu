@@ -7,18 +7,21 @@ import ConfirmationSlipModal from './ConfirmationSlipModal';
 export default function StudentDashboard({ onExploreClick }) {
   const { currentUser } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [visits, setVisits] = useState([]);
   const [selectedBookingForSlip, setSelectedBookingForSlip] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadBookings();
+    loadData();
   }, [currentUser]);
 
-  const loadBookings = async () => {
+  const loadData = async () => {
     if (!currentUser) return;
     setLoading(false);
     const data = await api.getStudentBookings(currentUser.id);
+    const visitList = await api.getVisits();
     setBookings(data);
+    setVisits(visitList);
   };
 
   return (
@@ -161,6 +164,55 @@ export default function StudentDashboard({ onExploreClick }) {
                       </p>
                     </div>
                   )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Scheduled In-Person / Video Visits */}
+      <div className="space-y-4 pt-6 border-t border-teal-800/60">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold text-white">Scheduled PG Visits</h3>
+            <p className="text-xs text-teal-300/70">
+              Direct owner walk-in tours & 360° video appointments with verified pass codes
+            </p>
+          </div>
+          <span className="text-xs font-bold text-teal-400 bg-teal-500/10 px-3 py-1 rounded-full border border-teal-500/20">
+            {visits.length} Visit Passes
+          </span>
+        </div>
+
+        {visits.length === 0 ? (
+          <div className="bg-[#0b2b32] border border-[#16515c] rounded-2xl p-6 text-center text-xs text-teal-300">
+            No visits scheduled yet. Click "Schedule Visit" on any PG page to book a zero-cost tour with the owner.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {visits.map(v => (
+              <div key={v.id} className="p-5 rounded-2xl bg-[#0c3139] border border-[#17525e] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white text-sm">{v.pgName}</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-teal-900 text-teal-200 text-[10px] font-bold border border-teal-700">
+                    {v.visitType}
+                  </span>
+                </div>
+
+                <div className="text-xs text-teal-200 space-y-1">
+                  <p>📅 Date: <strong>{v.visitDate}</strong> • ⏰ <strong>{v.timeSlot}</strong></p>
+                  <p>📞 Contact: {v.studentPhone}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-[#082227] border border-teal-800 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="text-[10px] text-teal-400 uppercase font-semibold">Pass Code:</span>
+                    <div className="font-mono font-black text-amber-400 text-sm">{v.passCode}</div>
+                  </div>
+                  <span className="text-emerald-400 font-bold flex items-center gap-1 text-[11px]">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> 0% Brokerage
+                  </span>
                 </div>
               </div>
             ))}

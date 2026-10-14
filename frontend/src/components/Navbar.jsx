@@ -156,43 +156,43 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
                   </div>
 
                   <div className="border-t border-teal-800/60 pt-2 px-3 pb-1">
-                    <p className="text-[11px] font-semibold text-teal-400 uppercase tracking-wider mb-1.5">
-                      Demo Persona Switch:
+                    <p className="text-[10px] font-bold text-teal-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                      <span>Switch Role Persona:</span>
+                      <span className="text-amber-400 font-mono text-[9px]">3 Roles</span>
                     </p>
-                    <div className="grid grid-cols-4 gap-1">
-                      <button
-                        onClick={() => { switchUserRole('leader'); setShowUserDropdown(false); }}
-                        className={`text-[11px] py-1 px-1 rounded text-center transition-colors ${
-                          currentUser.fullName === 'Arsh Mittal' ? 'bg-amber-500 text-slate-950 font-semibold' : 'bg-teal-900/60 text-teal-200 hover:bg-teal-800'
-                        }`}
-                        title="Arsh Mittal (Team Leader)"
-                      >
-                        Arsh 👑
-                      </button>
+                    <div className="grid grid-cols-3 gap-1.5">
                       <button
                         onClick={() => { switchUserRole('student'); setShowUserDropdown(false); }}
-                        className={`text-[11px] py-1 px-1 rounded text-center transition-colors ${
-                          currentUser.fullName === 'Aryan Gupta' ? 'bg-amber-500 text-slate-950 font-semibold' : 'bg-teal-900/60 text-teal-200 hover:bg-teal-800'
+                        className={`text-[11px] py-1.5 px-1 rounded-lg text-center font-medium transition-all ${
+                          currentUser.role === 'STUDENT'
+                            ? 'bg-amber-500 text-slate-950 font-bold shadow'
+                            : 'bg-teal-900/60 text-teal-200 hover:bg-teal-800'
                         }`}
-                        title="Aryan Gupta (Student)"
+                        title="Student Persona"
                       >
-                        Aryan
+                        🎓 Student
                       </button>
                       <button
                         onClick={() => { switchUserRole('owner'); setShowUserDropdown(false); }}
-                        className={`text-[11px] py-1 px-1 rounded text-center transition-colors ${
-                          currentUser.role === 'OWNER' ? 'bg-orange-500 text-white font-semibold' : 'bg-teal-900/60 text-teal-200 hover:bg-teal-800'
+                        className={`text-[11px] py-1.5 px-1 rounded-lg text-center font-medium transition-all ${
+                          currentUser.role === 'OWNER'
+                            ? 'bg-orange-500 text-white font-bold shadow'
+                            : 'bg-teal-900/60 text-teal-200 hover:bg-teal-800'
                         }`}
+                        title="PG Owner Persona"
                       >
-                        Owner
+                        🏢 Owner
                       </button>
                       <button
                         onClick={() => { switchUserRole('admin'); setShowUserDropdown(false); }}
-                        className={`text-[11px] py-1 px-1 rounded text-center transition-colors ${
-                          currentUser.role === 'ADMIN' ? 'bg-purple-500 text-white font-semibold' : 'bg-teal-900/60 text-teal-200 hover:bg-teal-800'
+                        className={`text-[11px] py-1.5 px-1 rounded-lg text-center font-medium transition-all ${
+                          currentUser.role === 'ADMIN'
+                            ? 'bg-purple-600 text-white font-bold shadow'
+                            : 'bg-teal-900/60 text-teal-200 hover:bg-teal-800'
                         }`}
+                        title="Admin Persona"
                       >
-                        Admin
+                        🛡️ Admin
                       </button>
                     </div>
                   </div>

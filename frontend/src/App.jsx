@@ -23,7 +23,7 @@ export default function App() {
 
   // Filters state
   const [filters, setFilters] = useState({
-    city: 'Pune', // Default to Pune matching Slide 3!
+    city: 'All', // Show all PGs across Pune, Bengaluru, Delhi & Kota
     locality: 'All',
     query: '',
     maxRent: null,
