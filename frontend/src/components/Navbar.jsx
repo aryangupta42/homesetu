@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Home, Compass, GitCompare, HelpCircle, User, Shield, LogOut, ArrowRight, Building, CheckCircle2 } from 'lucide-react';
+import { Home, Compass, GitCompare, HelpCircle, User, Shield, LogOut, ArrowRight, Building, CheckCircle2, MessageSquare, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export default function Navbar({ activeTab, setActiveTab, compareList, openCompareModal, openAuthModal }) {
+export default function Navbar({ activeTab, setActiveTab, compareList, openCompareModal, openAuthModal, onOpenWelcome, onOpenFeedback, onNavigateAdminTab }) {
   const { currentUser, logout, switchUserRole } = useAuth();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
@@ -58,34 +58,63 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
             How It Works
           </button>
 
+          {/* Feedback & Grievance Button: For Admin it navigates to Grievances Hub; for Student/Owner it opens submission form */}
           <button
-            onClick={() => setActiveTab('problem-solution')}
+            onClick={() => {
+              if (currentUser?.role === 'ADMIN') {
+                if (onNavigateAdminTab) {
+                  onNavigateAdminTab('feedbacks');
+                } else {
+                  setActiveTab('admin');
+                }
+              } else {
+                if (onOpenFeedback) onOpenFeedback('COMPLAINT');
+              }
+            }}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
-              activeTab === 'problem-solution'
-                ? 'bg-amber-500 text-white shadow-md'
+              currentUser?.role === 'ADMIN' && activeTab === 'admin'
+                ? 'bg-purple-900/70 text-purple-200 border border-purple-500/60 shadow-md font-bold'
                 : 'text-slate-300 hover:text-white hover:bg-[#144852]'
             }`}
+            title={currentUser?.role === 'ADMIN' ? "Monitor & Respond to Student & PG Owner Grievances" : "Submit Feedback or Report a Grievance"}
           >
-            <Shield className="w-4 h-4" />
-            Why HomeSetu
+            <MessageSquare className="w-4 h-4 text-amber-400" />
+            <span>{currentUser?.role === 'ADMIN' ? 'Monitor Grievances' : 'Feedback / Grievance'}</span>
+            {currentUser?.role === 'ADMIN' && (
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse ml-0.5" />
+            )}
           </button>
         </nav>
 
         {/* Right Action Icons */}
         <div className="flex items-center gap-3">
-          {/* Compare Button */}
-          <button
-            onClick={openCompareModal}
-            className="relative px-3.5 py-2 rounded-xl bg-[#113e47] hover:bg-[#17525e] border border-teal-700/40 text-slate-200 hover:text-white text-sm font-medium flex items-center gap-2 transition-colors"
-          >
-            <GitCompare className="w-4 h-4 text-amber-400" />
-            <span className="hidden sm:inline">Compare</span>
-            {compareList.length > 0 && (
-              <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center animate-pulse">
-                {compareList.length}
-              </span>
-            )}
-          </button>
+          {/* Welcome Screen Button */}
+          {onOpenWelcome && (
+            <button
+              onClick={onOpenWelcome}
+              title="Return to Welcome Screen"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0e363e] hover:bg-[#154a55] border border-teal-700/40 text-teal-200 text-xs font-semibold transition-all hover:border-amber-400/50"
+            >
+              <span>✨</span>
+              <span>Welcome Screen</span>
+            </button>
+          )}
+
+          {/* Compare Button (Only visible for logged-in College Students) */}
+          {currentUser?.role === 'STUDENT' && (
+            <button
+              onClick={openCompareModal}
+              className="relative px-3.5 py-2 rounded-xl bg-[#113e47] hover:bg-[#17525e] border border-teal-700/40 text-slate-200 hover:text-white text-sm font-medium flex items-center gap-2 transition-colors"
+            >
+              <GitCompare className="w-4 h-4 text-amber-400" />
+              <span className="hidden sm:inline">Compare</span>
+              {compareList.length > 0 && (
+                <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center animate-pulse">
+                  {compareList.length}
+                </span>
+              )}
+            </button>
+          )}
 
           {/* User Status / Role Pill */}
           {currentUser ? (
@@ -156,12 +185,36 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
                   </div>
 
                   <div className="border-t border-teal-800/60 mt-2 pt-1">
+                    {onOpenFeedback && (
+                      <button
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          onOpenFeedback('COMPLAINT');
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-red-950/30 text-red-200 flex items-center gap-2 text-xs transition-colors"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 text-red-400" />
+                        <span>File Complaint / Feedback</span>
+                      </button>
+                    )}
+                    {onOpenWelcome && (
+                      <button
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          onOpenWelcome();
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-teal-900/40 text-teal-200 flex items-center gap-2 text-xs transition-colors"
+                      >
+                        <span>✨</span>
+                        <span>View Welcome Landing Screen</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         logout();
                         setActiveTab('explore');
                         setShowUserDropdown(false);
-                        openAuthModal('login', null);
+                        if (onOpenWelcome) onOpenWelcome();
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-red-950/40 text-red-300 hover:text-red-200 flex items-center gap-2 text-xs transition-colors"
                     >

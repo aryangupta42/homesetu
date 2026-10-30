@@ -12,4 +12,6 @@ public interface PgListingRepository extends JpaRepository<PgListing, Long>, Jpa
     List<PgListing> findByOwnerId(Long ownerId);
     List<PgListing> findByCityIgnoreCase(String city);
     List<PgListing> findByIsVerifiedTrue();
+    boolean existsByName(String name);
+    java.util.Optional<PgListing> findByName(String name);
 }

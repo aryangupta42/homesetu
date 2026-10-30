@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
-import { Building, Plus, CheckCircle2, XCircle, Clock, Users, Bed, MapPin, IndianRupee, ShieldCheck, Check, X, FileText, AlertTriangle, Shield, UploadCloud } from 'lucide-react';
+import { Building, Plus, CheckCircle2, XCircle, Clock, Users, Bed, MapPin, IndianRupee, ShieldCheck, Check, X, FileText, AlertTriangle, Shield, UploadCloud, Sparkles, MessageSquare } from 'lucide-react';
+import PgFeaturesModal from './PgFeaturesModal';
 
-export default function OwnerDashboard({ openAuthModal, onExploreClick }) {
+export default function OwnerDashboard({ openAuthModal, onExploreClick, onOpenFeedback }) {
   const { currentUser, logout } = useAuth();
   const [requests, setRequests] = useState([]);
   const [listings, setListings] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showAddRoomModal, setShowAddRoomModal] = useState(false);
+  const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [selectedPgForRoom, setSelectedPgForRoom] = useState(null);
+  const [selectedPgForFeatures, setSelectedPgForFeatures] = useState(null);
   const [actionModalBooking, setActionModalBooking] = useState(null);
   const [ownerNote, setOwnerNote] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,10 +73,21 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick }) {
   const loadData = async () => {
     if (!currentUser) return;
     const reqs = await api.getOwnerBookings(currentUser.id);
-    const pgs = await api.getPgs();
-    const myListings = pgs.filter(p => p.ownerId === currentUser.id || p.ownerEmail === currentUser.email);
+    let myListings = [];
+    try {
+      const res = await fetch(`/api/pgs/owner/${currentUser.id}`);
+      if (res.ok) {
+        myListings = await res.json();
+      }
+    } catch (e) {
+      console.warn("Could not fetch owner listings from backend:", e);
+    }
+    if (myListings.length === 0) {
+      const pgs = await api.getPgs();
+      myListings = pgs.filter(p => p.ownerId === currentUser.id || (p.ownerEmail && p.ownerEmail.toLowerCase() === currentUser.email?.toLowerCase()));
+    }
     setRequests(reqs);
-    setListings(myListings.length > 0 ? myListings : pgs.slice(0, 3));
+    setListings(myListings);
   };
 
   const handleAction = async (bookingId, action) => {
@@ -225,7 +239,17 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {onOpenFeedback && (
+            <button
+              onClick={() => onOpenFeedback('FEEDBACK')}
+              className="px-4 py-3 rounded-xl bg-[#0e3b44] hover:bg-[#144f5c] text-teal-200 border border-teal-700 font-bold text-xs transition-colors flex items-center gap-1.5"
+            >
+              <MessageSquare className="w-4 h-4 text-amber-400" />
+              <span>Grievance / Feedback</span>
+            </button>
+          )}
+
           <button
             onClick={() => setShowVerificationModal(true)}
             className="px-4 py-3 rounded-xl bg-teal-900/80 hover:bg-teal-800 text-teal-200 border border-teal-700 font-bold text-xs transition-colors flex items-center gap-2"
@@ -427,7 +451,30 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick }) {
                   <span>Available: <strong>{pg.availableRooms || 4} beds</strong></span>
                 </div>
 
-                <div className="pt-2 flex items-center gap-2">
+                {/* Property Features & Custom Tags Preview */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  {pg.hasWifi && <span className="text-[10px] px-2 py-0.5 rounded bg-teal-900/80 text-teal-300 border border-teal-700/60">WiFi</span>}
+                  {pg.hasAc && <span className="text-[10px] px-2 py-0.5 rounded bg-teal-900/80 text-teal-300 border border-teal-700/60">AC</span>}
+                  {pg.hasPowerBackup && <span className="text-[10px] px-2 py-0.5 rounded bg-teal-900/80 text-teal-300 border border-teal-700/60">Power Backup</span>}
+                  {pg.foodIncluded && <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">Meals ({pg.foodType || 'Veg'})</span>}
+                  {pg.hasAttachedBath && <span className="text-[10px] px-2 py-0.5 rounded bg-teal-900/80 text-teal-300 border border-teal-700/60">Attached Bath</span>}
+                  {pg.hasLift && <span className="text-[10px] px-2 py-0.5 rounded bg-teal-900/80 text-teal-300 border border-teal-700/60">Lift</span>}
+                  {pg.customFeatures && (
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-orange-500/10 text-orange-300 border border-orange-500/30 truncate max-w-[140px]">
+                      ✨ {pg.customFeatures.split(',')[0]}
+                    </span>
+                  )}
+                </div>
+
+                <div className="pt-2 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => { setSelectedPgForFeatures(pg); setShowFeaturesModal(true); }}
+                    className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs font-bold shadow-md flex items-center gap-1.5 transition-all"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Manage Features</span>
+                  </button>
+
                   <button
                     onClick={() => { setSelectedPgForRoom(pg); setShowAddRoomModal(true); }}
                     className="px-3 py-1.5 rounded-lg bg-teal-900/80 hover:bg-teal-800 text-teal-200 text-xs font-semibold border border-teal-700 flex items-center gap-1"
@@ -435,6 +482,7 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick }) {
                     <Plus className="w-3.5 h-3.5 text-amber-400" />
                     <span>Add Room Option</span>
                   </button>
+
                   <button
                     onClick={() => setShowVerificationModal(true)}
                     className="px-3 py-1.5 rounded-lg bg-[#082227] hover:bg-[#0a2b32] text-teal-300 text-xs font-semibold border border-teal-800"
@@ -863,6 +911,22 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick }) {
             </form>
           </div>
         </div>
+      )}
+
+      {/* MODAL 5: Separate Feature & Amenities Customizer per PG */}
+      {showFeaturesModal && selectedPgForFeatures && (
+        <PgFeaturesModal
+          isOpen={showFeaturesModal}
+          onClose={() => {
+            setShowFeaturesModal(false);
+            setSelectedPgForFeatures(null);
+          }}
+          pg={selectedPgForFeatures}
+          onUpdateSuccess={(updatedPg) => {
+            setListings(prev => prev.map(p => (p.id === updatedPg.id ? { ...p, ...updatedPg } : p)));
+            loadData();
+          }}
+        />
       )}
     </div>
   );

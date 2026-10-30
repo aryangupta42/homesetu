@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { X, Eye, EyeOff, CheckCircle2, AlertCircle, UploadCloud, FileText, Check, ArrowLeft, ArrowRight, Shield, Building, User, Lock } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { X, Eye, EyeOff, CheckCircle2, AlertCircle, UploadCloud, FileText, Check, ArrowLeft, ArrowRight, Shield, Building, User, Lock, Sparkles, Key, ExternalLink } from 'lucide-react';
+import { useAuth, DEMO_USERS } from '../context/AuthContext';
 
 export default function AuthModal({ initialMode = 'login', initialRole = null, onClose, onAuthSuccess }) {
   const { login, register } = useAuth();
   
-  // If initialRole was passed (e.g. from a specific button), jump straight to form. Otherwise show role gateway!
-  const [step, setStep] = useState(initialRole ? 'form' : 'select-role'); // 'select-role' | 'form'
+  // Steps: 'select-role' | 'form' | 'demo'
+  const [step, setStep] = useState(initialRole ? 'form' : 'select-role');
   const [selectedRole, setSelectedRole] = useState(initialRole || 'STUDENT'); // 'STUDENT' | 'OWNER' | 'ADMIN'
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
 
@@ -39,7 +39,7 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Select a role from the gateway and move to form
+  // Select a role from gateway
   const handleSelectRole = (roleKey, mode = 'login') => {
     setSelectedRole(roleKey);
     setIsLogin(mode === 'login');
@@ -80,14 +80,13 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
         return;
       }
 
-      // Strict login requiring correct credentials and matching role
       const res = await login(email, password, selectedRole);
       if (res.success) {
         setSuccessMsg(`Login verified! Welcome ${res.user?.fullName || selectedRole}.`);
         setTimeout(() => {
           if (onAuthSuccess) onAuthSuccess(res.user);
           onClose();
-        }, 600);
+        }, 500);
       } else {
         setError(res.message || 'Invalid email or password. Please verify your credentials.');
       }
@@ -116,26 +115,43 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
         email,
         password,
         role: selectedRole,
-        phone: mobileNumber || '+91 98765 00000',
+        phone: mobileNumber || '+91 98111 00000',
         college: selectedRole === 'STUDENT' ? collegeName : '',
         studentId: selectedRole === 'STUDENT' ? studentId : '',
         propertyName: selectedRole === 'OWNER' ? propertyName : '',
         address: selectedRole === 'OWNER' ? pgAddress : '',
-        verificationDoc: selectedRole === 'OWNER' ? uploadedDocName : '',
-        verificationStatus: selectedRole === 'OWNER' ? 'PENDING' : 'VERIFIED',
-        city: 'Pune'
+        city: 'Ghaziabad'
       };
 
       const res = await register(payload);
       if (res.success) {
-        setSuccessMsg(`Account created successfully as ${selectedRole}! Logging you in...`);
+        setSuccessMsg(`Account created successfully as ${selectedRole}! Redirecting to dashboard...`);
         setTimeout(() => {
           if (onAuthSuccess) onAuthSuccess(res.user);
           onClose();
-        }, 800);
+        }, 600);
       } else {
         setError(res.message || 'Registration failed. Please try again.');
       }
+    }
+    setLoading(false);
+  };
+
+  // Quick Demo Login Handler (triggers actual backend API authentication)
+  const handleQuickDemoLogin = async (acc, role) => {
+    setError('');
+    setSuccessMsg('');
+    setLoading(true);
+
+    const res = await login(acc.email, acc.password, role);
+    if (res.success) {
+      setSuccessMsg(`Demo authenticated as ${acc.fullName}! Opening ${role === 'OWNER' ? 'Owner' : role === 'ADMIN' ? 'Admin' : 'Student'} Dashboard...`);
+      setTimeout(() => {
+        if (onAuthSuccess) onAuthSuccess(res.user);
+        onClose();
+      }, 500);
+    } else {
+      setError(res.message || "Failed to log in with demo account.");
     }
     setLoading(false);
   };
@@ -154,17 +170,17 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="bg-white text-slate-900 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden my-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white text-slate-900 rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden my-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
 
-        {/* ================= STEP 1: ROLE SELECTION GATEWAY ================= */}
+        {/* ================= STEP 1: ROLE SELECTION GATEWAY (3 PERSONAS ONLY) ================= */}
         {step === 'select-role' && (
           <div className="p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#545ced]">Authentication Gateway</span>
-                <h2 className="text-2xl font-extrabold text-slate-900 mt-0.5">Who Are You?</h2>
+                <span className="text-xs font-bold uppercase tracking-wider text-[#545ced]">Role Selection Gateway</span>
+                <h2 className="text-2xl font-black text-slate-900 mt-0.5">Choose Your Persona</h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Select your role to access your dedicated, secure portal.
+                  Select your role to access your dedicated portal with pre-loaded demo accounts.
                 </p>
               </div>
               <button
@@ -175,82 +191,99 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
               </button>
             </div>
 
-            {/* 3 Role Selection Cards */}
-            <div className="space-y-3">
-              {/* Option 1: Student */}
+            {/* 3 Persona Cards */}
+            <div className="grid grid-cols-1 gap-3.5">
+              
+              {/* Option 1: College Student */}
               <div
                 onClick={() => handleSelectRole('STUDENT', 'login')}
-                className="group p-4 rounded-2xl border-2 border-slate-200 hover:border-[#545ced] hover:bg-[#545ced]/5 transition-all cursor-pointer flex items-center justify-between"
+                className="group p-4 rounded-2xl border-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50/50 transition-all cursor-pointer flex items-center justify-between shadow-sm hover:shadow-md"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
+                  <div className="w-13 h-13 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform ring-1 ring-amber-300">
                     🎓
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-slate-900 text-base group-hover:text-[#545ced] transition-colors">
-                      College Student
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-extrabold text-slate-900 text-base group-hover:text-amber-700 transition-colors">
+                        College Student
+                      </h3>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">
+                        0% Brokerage
+                      </span>
+                    </div>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Find & book verified PGs, schedule zero-cost visits, and download official Confirmation IDs.
+                      Discover verified PGs near your campus, compare amenities, send booking requests & track confirmation IDs.
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-[#545ced] group-hover:translate-x-1 transition-all shrink-0 ml-2" />
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all shrink-0 ml-2" />
               </div>
 
-              {/* Option 2: PG Owner */}
+              {/* Option 2: PG Property Owner */}
               <div
                 onClick={() => handleSelectRole('OWNER', 'login')}
-                className="group p-4 rounded-2xl border-2 border-slate-200 hover:border-[#545ced] hover:bg-[#545ced]/5 transition-all cursor-pointer flex items-center justify-between"
+                className="group p-4 rounded-2xl border-2 border-slate-200 hover:border-orange-500 hover:bg-orange-50/50 transition-all cursor-pointer flex items-center justify-between shadow-sm hover:shadow-md"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-orange-100 text-orange-700 flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
+                  <div className="w-13 h-13 rounded-2xl bg-orange-100 text-orange-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform ring-1 ring-orange-300">
                     🏢
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-slate-900 text-base group-hover:text-[#545ced] transition-colors">
-                      PG Property Owner
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-extrabold text-slate-900 text-base group-hover:text-orange-700 transition-colors">
+                        PG Property Owner
+                      </h3>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 font-bold">
+                        Owner Portal
+                      </span>
+                    </div>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Publish accommodations, upload ownership & safety documents, and review student booking requests.
+                      Publish accommodations, update vacant bed counts, review student applications and approve bookings.
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-[#545ced] group-hover:translate-x-1 transition-all shrink-0 ml-2" />
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all shrink-0 ml-2" />
               </div>
 
-              {/* Option 3: Admin */}
+              {/* Option 3: Administrator */}
               <div
                 onClick={() => handleSelectRole('ADMIN', 'login')}
-                className="group p-4 rounded-2xl border-2 border-slate-200 hover:border-purple-600 hover:bg-purple-50 transition-all cursor-pointer flex items-center justify-between"
+                className="group p-4 rounded-2xl border-2 border-slate-200 hover:border-purple-600 hover:bg-purple-50/50 transition-all cursor-pointer flex items-center justify-between shadow-sm hover:shadow-md"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
+                  <div className="w-13 h-13 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform ring-1 ring-purple-300">
                     🛡️
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-slate-900 text-base group-hover:text-purple-700 transition-colors">
-                      Platform Administrator
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-extrabold text-slate-900 text-base group-hover:text-purple-700 transition-colors">
+                        Administrator
+                      </h3>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-bold">
+                        Admin Audit
+                      </span>
+                    </div>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Audit electricity meter bills, verify host government proofs, and grant 100% Verified badges.
+                      Audit property deeds, verify owner credentials, resolve grievance tickets, and monitor all platform activity.
                     </p>
                   </div>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-purple-700 group-hover:translate-x-1 transition-all shrink-0 ml-2" />
               </div>
+
             </div>
 
-            <p className="text-center text-xs text-slate-400 pt-2">
-              Strict Role Governance • Only registered credentials can open their authorized portal
+            <p className="text-center text-[11px] text-slate-400 pt-1">
+              Protected with Spring Data JPA & MySQL • Role-based access control strictly enforced
             </p>
           </div>
         )}
 
-        {/* ================= STEP 2: EXACT SCREENSHOT FORM (LOGIN / CREATE ACCOUNT) ================= */}
+        {/* ================= STEP 2: ROLE FORM (LOGIN / REGISTER WITH DIRECT DEMO CARDS) ================= */}
         {step === 'form' && (
           <div>
-            {/* Top Bar with Back to Role selection and Close */}
+            {/* Top Bar with Back and Close */}
             <div className="p-4 px-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
               <button
                 type="button"
@@ -258,91 +291,235 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                 className="text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Change Role ({getRoleName()})</span>
+                <span>Change Persona ({getRoleName()})</span>
               </button>
-
+              
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Content matching exact Image 2 / 3 / 4 */}
-            <div className="p-6 sm:p-8 space-y-6 max-h-[78vh] overflow-y-auto">
-              {/* Header Icon & Title */}
-              <div>
-                <div className="text-4xl mb-2">{getRoleIcon()}</div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                  {isLogin ? `Login - ${getRoleName()}` : `Create Account - ${getRoleName()}`}
-                </h2>
-                <p className="text-sm text-slate-500 mt-1">
-                  {isLogin ? 'Enter your registered details.' : 'Create your HomeSetu account.'}
-                </p>
+            <div className="p-6 sm:p-8 space-y-5 max-h-[80vh] overflow-y-auto">
+              
+              {/* Persona Pill & Login/Register Toggle */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{getRoleIcon()}</span>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Authenticated Portal</span>
+                    <h2 className="text-xl font-black text-slate-900">{getRoleName()} Access</h2>
+                  </div>
+                </div>
+
+                {selectedRole !== 'ADMIN' && (
+                  <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => { setIsLogin(true); setError(''); setSuccessMsg(''); }}
+                      className={`px-3 py-1.5 rounded-lg transition-all ${isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setIsLogin(false); setError(''); setSuccessMsg(''); }}
+                      className={`px-3 py-1.5 rounded-lg transition-all ${!isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                    >
+                      Register
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Alerts */}
+              {/* Feedback messages */}
               {error && (
-                <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+                <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 animate-in fade-in">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
-
               {successMsg && (
-                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-semibold">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>{successMsg}</span>
                 </div>
               )}
 
-              {/* Role Credentials Hint with 1-Click Auto-fill */}
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-slate-700 font-semibold">
-                    {getRoleName()} Demo ID: <span className="font-mono text-[#545ced] font-bold">{selectedRole === 'STUDENT' ? 'student@homesetu.com' : selectedRole === 'OWNER' ? 'owner@homesetu.com' : 'admin@homesetu.com'}</span>
+              {/* ROLE-SPECIFIC 1-CLICK DEMO ACCOUNTS (Visible only for this persona) */}
+              {isLogin && selectedRole === 'STUDENT' && (
+                <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/90 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-600" />
+                      <span className="text-xs font-black uppercase tracking-wider text-amber-900">
+                        1-Click Student Demo Accounts
+                      </span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 font-bold">
+                      5 Pre-loaded Students
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-amber-950/80">
+                    Click any student below to immediately log in and explore student dashboard & campus PGs:
                   </p>
-                  <p className="text-slate-500 text-[11px] mt-0.5">
-                    Password: <span className="font-mono font-bold text-slate-800">{selectedRole === 'ADMIN' ? 'admin123' : '123456'}</span>
-                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                    {DEMO_USERS.students.map((st, idx) => (
+                      <button
+                        key={st.email}
+                        type="button"
+                        disabled={loading}
+                        onClick={() => handleQuickDemoLogin(st, 'STUDENT')}
+                        className="p-2.5 rounded-xl border border-amber-200 bg-white hover:border-amber-500 hover:bg-amber-100/60 transition-all text-left flex items-center justify-between group shadow-2xs hover:shadow-sm cursor-pointer"
+                      >
+                        <div className="min-w-0 pr-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-extrabold text-slate-900 group-hover:text-amber-800 truncate">
+                              {st.fullName}
+                            </span>
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-amber-100 text-amber-800 font-mono font-bold">
+                              S{idx + 1}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                            {st.college.split(',')[0]}
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-bold text-amber-700 bg-amber-50 group-hover:bg-amber-500 group-hover:text-white px-2 py-1 rounded-lg transition-colors shrink-0">
+                          Login →
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (selectedRole === 'STUDENT') {
-                      setEmail('student@homesetu.com');
-                      setPassword('123456');
-                    } else if (selectedRole === 'OWNER') {
-                      setEmail('owner@homesetu.com');
-                      setPassword('123456');
-                    } else if (selectedRole === 'ADMIN') {
-                      setEmail('admin@homesetu.com');
-                      setPassword('admin123');
-                    }
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-[#545ced]/10 hover:bg-[#545ced]/20 text-[#545ced] font-bold text-xs border border-[#545ced]/30 transition-all cursor-pointer shadow-sm"
-                >
-                  ⚡ Auto-fill
-                </button>
-              </div>
+              )}
+
+              {isLogin && selectedRole === 'OWNER' && (
+                <div className="p-4 rounded-2xl bg-orange-50/80 border border-orange-200/90 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-orange-600" />
+                      <span className="text-xs font-black uppercase tracking-wider text-orange-900">
+                        1-Click PG Owner Demo Accounts
+                      </span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-200 text-orange-900 font-bold">
+                      5 Owners (25 PGs)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-orange-950/80">
+                    Click any owner below to manage accommodations, customize features & review bookings:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                    {DEMO_USERS.owners.map((ow, idx) => (
+                      <button
+                        key={ow.email}
+                        type="button"
+                        disabled={loading}
+                        onClick={() => handleQuickDemoLogin(ow, 'OWNER')}
+                        className="p-2.5 rounded-xl border border-orange-200 bg-white hover:border-orange-500 hover:bg-orange-100/60 transition-all text-left flex items-center justify-between group shadow-2xs hover:shadow-sm cursor-pointer"
+                      >
+                        <div className="min-w-0 pr-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-extrabold text-slate-900 group-hover:text-orange-800 truncate">
+                              {ow.fullName}
+                            </span>
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-orange-100 text-orange-800 font-mono font-bold">
+                              O{idx + 1}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                            {ow.propertyName.replace(/\(.*?\)/g, '').trim()}
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-bold text-orange-700 bg-orange-50 group-hover:bg-orange-500 group-hover:text-white px-2 py-1 rounded-lg transition-colors shrink-0">
+                          Login →
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedRole === 'ADMIN' && (
+                <div className="p-4 rounded-2xl bg-purple-50/80 border border-purple-200/90 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-purple-700" />
+                      <span className="text-xs font-black uppercase tracking-wider text-purple-900">
+                        1-Click Administrator Demo
+                      </span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-200 text-purple-900 font-bold">
+                      Full Access
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-purple-950/80">
+                    Audit deeds, resolve grievance tickets, and monitor all platform activities:
+                  </p>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleQuickDemoLogin(DEMO_USERS.admin, 'ADMIN')}
+                    className="w-full p-3 rounded-xl border border-purple-200 bg-white hover:border-purple-600 hover:bg-purple-100/50 transition-all text-left flex items-center justify-between group shadow-2xs hover:shadow-sm cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center text-sm font-bold shadow-sm">
+                        🛡️
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-extrabold text-slate-900 group-hover:text-purple-900">
+                            {DEMO_USERS.admin.fullName}
+                          </span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 bg-purple-100 text-purple-800 rounded font-semibold">
+                            {DEMO_USERS.admin.email}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-0.5">
+                          Pre-verified credentials • Audit deeds & grievances hub
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-white bg-purple-600 group-hover:bg-purple-700 px-3 py-1.5 rounded-xl transition-all shadow-sm">
+                      Login →
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {/* Divider if in Login mode */}
+              {isLogin && (
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-slate-200"></div>
+                  <span className="flex-shrink mx-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Or Sign In With Custom Credentials
+                  </span>
+                  <div className="flex-grow border-t border-slate-200"></div>
+                </div>
+              )}
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 
-                {/* ================= LOGIN FORM (Exact match for media_1791983287152_d2250a3d.png) ================= */}
+                {/* LOGIN FORM */}
                 {isLogin ? (
                   <>
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
-                        Email Address
+                        Email Address / Login ID
                       </label>
                       <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter email"
+                        placeholder={
+                          selectedRole === 'STUDENT' ? 'student1@homesetu.demo' :
+                          selectedRole === 'OWNER' ? 'owner1@homesetu.demo' : 'admin@homesetu.demo'
+                        }
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
                       />
                     </div>
@@ -378,36 +555,52 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                           onChange={(e) => setRememberMe(e.target.checked)}
                           className="rounded border-slate-300 text-[#545ced] focus:ring-[#545ced]"
                         />
-                        <span>Remember Me</span>
+                        <span>Remember credentials</span>
                       </label>
-                      <span className="text-[#545ced] hover:underline cursor-pointer">Forgot password?</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (selectedRole === 'STUDENT') {
+                            setEmail('student1@homesetu.demo');
+                            setPassword('Student@123');
+                          } else if (selectedRole === 'OWNER') {
+                            setEmail('owner1@homesetu.demo');
+                            setPassword('Owner@123');
+                          } else if (selectedRole === 'ADMIN') {
+                            setEmail('admin@homesetu.demo');
+                            setPassword('Admin@123');
+                          }
+                        }}
+                        className="text-[#545ced] font-bold hover:underline"
+                      >
+                        Auto-fill Demo
+                      </button>
                     </div>
 
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3.5 rounded-xl bg-[#545ced] hover:bg-[#434bd8] text-white font-bold text-sm transition-all shadow-md shadow-[#545ced]/30 flex items-center justify-center gap-2 mt-4"
+                      className="w-full py-3.5 rounded-xl bg-[#545ced] hover:bg-[#434bd8] text-white font-bold text-sm transition-all shadow-md shadow-[#545ced]/30 flex items-center justify-center gap-2 mt-4 cursor-pointer"
                     >
-                      <span>🔐</span>
-                      <span>{loading ? `Verifying ${getRoleName()}...` : 'Login'}</span>
+                      <Lock className="w-4 h-4" />
+                      <span>{loading ? `Verifying ${getRoleName()}...` : `Login as ${getRoleName()}`}</span>
                     </button>
                   </>
                 ) : (
-                  /* ================= SIGN UP FORMS (Images 3 & 4) ================= */
+                  /* REGISTRATION FORM */
                   <>
-                    {/* Row 1: Full Name & Mobile Number */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
                         <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
-                          Full Name
+                          {selectedRole === 'OWNER' ? 'Owner Name' : 'Full Name'}
                         </label>
                         <input
                           type="text"
                           required
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
-                          placeholder="Full name"
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
+                          placeholder="Your full name"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
                         />
                       </div>
 
@@ -420,13 +613,12 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                           required
                           value={mobileNumber}
                           onChange={(e) => setMobileNumber(e.target.value)}
-                          placeholder="10 digit mobile"
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
+                          placeholder="10-digit mobile"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
                         />
                       </div>
                     </div>
 
-                    {/* Email Address */}
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
                         Email Address
@@ -436,44 +628,44 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="example@email.com"
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
+                        placeholder="example@college.edu or gmail"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
                       />
                     </div>
 
-                    {/* STUDENT SPECIFIC FIELDS (Image 3) */}
+                    {/* Student Specific Fields */}
                     {selectedRole === 'STUDENT' && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                         <div>
                           <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
-                            College Name
+                            College / University Name
                           </label>
                           <input
                             type="text"
                             required
                             value={collegeName}
                             onChange={(e) => setCollegeName(e.target.value)}
-                            placeholder="College name"
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
+                            placeholder="e.g. ABES EC / AKGEC"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
                           />
                         </div>
 
                         <div>
                           <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
-                            Student ID
+                            Student ID / Roll No.
                           </label>
                           <input
                             type="text"
                             value={studentId}
                             onChange={(e) => setStudentId(e.target.value)}
-                            placeholder="Student ID (e.g. COEP-2024-91)"
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
+                            placeholder="e.g. ABES-2023-CS-042"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
                           />
                         </div>
                       </div>
                     )}
 
-                    {/* PG OWNER SPECIFIC FIELDS (Image 4 + Document Upload) */}
+                    {/* PG Owner Specific Fields */}
                     {selectedRole === 'OWNER' && (
                       <>
                         <div>
@@ -485,122 +677,52 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                             required
                             value={propertyName}
                             onChange={(e) => setPropertyName(e.target.value)}
-                            placeholder="Your PG name"
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
+                            placeholder="e.g. Chauhan Luxury Residency"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
                           />
                         </div>
 
                         <div>
                           <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
-                            PG Address
+                            Property Address & Locality
                           </label>
                           <input
                             type="text"
                             required
                             value={pgAddress}
                             onChange={(e) => setPgAddress(e.target.value)}
-                            placeholder="Full PG address"
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
+                            placeholder="e.g. Crossings Republik / Indirapuram, Ghaziabad"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
-                            Owner Verification Status
-                          </label>
-                          <select
-                            value={verificationStatus}
-                            onChange={(e) => setVerificationStatus(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
-                          >
-                            <option value="Verification Pending">Verification Pending (Requires Document Upload)</option>
-                            <option value="Documents Uploaded for Audit">Documents Uploaded for Audit</option>
-                          </select>
-                        </div>
-
-                        {/* DOCUMENT UPLOAD (Requested explicitly by user) */}
-                        <div className="p-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 space-y-2.5">
-                          <div className="flex items-center justify-between">
-                            <label className="text-xs font-bold uppercase text-slate-700 tracking-wider flex items-center gap-1.5">
-                              <UploadCloud className="w-4 h-4 text-[#545ced]" />
-                              <span>Owner Property Document Upload</span>
-                            </label>
-                            <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
-                              Required for Verification
-                            </span>
-                          </div>
-                          
-                          <p className="text-[11px] text-slate-500">
-                            Upload Electricity Bill, Property Deed, or Aadhaar Card for Admin verification.
-                          </p>
-
-                          <div className="flex items-center gap-3">
-                            <label className="px-3 py-2 rounded-xl bg-white border border-slate-300 hover:border-[#545ced] text-[#545ced] font-bold text-xs cursor-pointer shadow-sm transition-all flex items-center gap-1.5 shrink-0">
-                              <UploadCloud className="w-4 h-4" />
-                              <span>Choose Document</span>
-                              <input
-                                type="file"
-                                accept=".pdf,.png,.jpg,.jpeg"
-                                onChange={handleFileUpload}
-                                className="hidden"
-                              />
-                            </label>
-
-                            {hasUploadedDoc && (
-                              <div className="flex-1 flex items-center justify-between bg-white px-3 py-1.5 rounded-xl border border-emerald-200 text-xs">
-                                <div className="flex items-center gap-2 truncate">
-                                  <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
-                                  <span className="font-semibold text-slate-800 truncate">{uploadedDocName}</span>
-                                  <span className="text-slate-400 text-[10px]">({uploadedDocSize})</span>
-                                </div>
-                                <Check className="w-4 h-4 text-emerald-600 shrink-0 ml-1" />
-                              </div>
-                            )}
+                        <div className="p-3 rounded-xl bg-orange-50 border border-orange-200 text-xs flex items-start gap-2.5">
+                          <UploadCloud className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-bold text-orange-950">Ownership & Verification Document</p>
+                            <p className="text-orange-800 text-[11px] mt-0.5">
+                              Attached: <span className="font-mono font-semibold">{uploadedDocName}</span> (Electricity bill/deed).
+                              Admins audit this before issuing the Verified Badge.
+                            </p>
                           </div>
                         </div>
                       </>
                     )}
 
-                    {/* ADMIN SPECIFIC FIELDS */}
-                    {selectedRole === 'ADMIN' && (
-                      <div>
-                        <label className="block text-xs font-bold uppercase text-purple-700 tracking-wider mb-1.5">
-                          Admin Security Passcode
-                        </label>
-                        <input
-                          type="password"
-                          required
-                          value={adminPasscode}
-                          onChange={(e) => setAdminPasscode(e.target.value)}
-                          placeholder="Enter security passcode (e.g. admin123 or ADMIN2026)"
-                          className="w-full px-4 py-3 rounded-xl border border-purple-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-sm font-medium transition-all"
-                        />
-                      </div>
-                    )}
-
-                    {/* Row 4: Password & Confirm Password */}
+                    {/* Password Fields */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
                         <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
                           Password
                         </label>
-                        <div className="relative">
-                          <input
-                            type={showPassword ? "text" : "password"}
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Create password"
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all pr-11"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                          >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
+                        <input
+                          type="password"
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Min 6 chars"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
+                        />
                       </div>
 
                       <div>
@@ -608,12 +730,12 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                           Confirm Password
                         </label>
                         <input
-                          type={showPassword ? "text" : "password"}
+                          type="password"
                           required
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Confirm password"
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
+                          placeholder="Re-type password"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] text-sm font-medium transition-all"
                         />
                       </div>
                     </div>
@@ -621,44 +743,19 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3.5 rounded-xl bg-[#545ced] hover:bg-[#434bd8] text-white font-bold text-sm transition-all shadow-md shadow-[#545ced]/30 flex items-center justify-center gap-2 mt-4"
+                      className="w-full py-3.5 rounded-xl bg-[#545ced] hover:bg-[#434bd8] text-white font-bold text-sm transition-all shadow-md shadow-[#545ced]/30 flex items-center justify-center gap-2 mt-4 cursor-pointer"
                     >
-                      <span>📝</span>
-                      <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{loading ? 'Creating Account...' : `Register as ${getRoleName()}`}</span>
                     </button>
                   </>
                 )}
-
-                {/* Footer switcher matching Images 2, 3, 4 */}
-                <div className="text-center pt-3 border-t border-slate-100">
-                  {isLogin ? (
-                    <p className="text-sm text-slate-600">
-                      Don't have an account?{' '}
-                      <button
-                        type="button"
-                        onClick={() => { setIsLogin(false); setError(''); setSuccessMsg(''); }}
-                        className="text-[#545ced] font-bold border border-[#545ced] px-2 py-0.5 rounded-lg hover:bg-[#545ced]/10 transition-colors inline-block ml-1"
-                      >
-                        Create Account
-                      </button>
-                    </p>
-                  ) : (
-                    <p className="text-sm text-slate-600">
-                      Already have an account?{' '}
-                      <button
-                        type="button"
-                        onClick={() => { setIsLogin(true); setError(''); setSuccessMsg(''); }}
-                        className="text-[#545ced] font-bold border border-[#545ced] px-2 py-0.5 rounded-lg hover:bg-[#545ced]/10 transition-colors inline-block ml-1"
-                      >
-                        Login
-                      </button>
-                    </p>
-                  )}
-                </div>
               </form>
+
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

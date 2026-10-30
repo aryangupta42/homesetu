@@ -45,6 +45,15 @@ public class PgListing {
     private Boolean hasCctv = true;
     private Boolean hasPowerBackup = true;
     private Boolean hasGym = false;
+    private Boolean hasRoWater = true;
+    private Boolean hasLift = false;
+    private Boolean hasBiometric = false;
+    private Boolean hasParking = true;
+    private Boolean hasGeyser = true;
+    private Boolean hasHousekeeping = true;
+
+    @Column(columnDefinition = "TEXT")
+    private String customFeatures;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -185,4 +194,25 @@ public class PgListing {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Boolean getHasRoWater() { return hasRoWater; }
+    public void setHasRoWater(Boolean hasRoWater) { this.hasRoWater = hasRoWater; }
+
+    public Boolean getHasLift() { return hasLift; }
+    public void setHasLift(Boolean hasLift) { this.hasLift = hasLift; }
+
+    public Boolean getHasBiometric() { return hasBiometric; }
+    public void setHasBiometric(Boolean hasBiometric) { this.hasBiometric = hasBiometric; }
+
+    public Boolean getHasParking() { return hasParking; }
+    public void setHasParking(Boolean hasParking) { this.hasParking = hasParking; }
+
+    public Boolean getHasGeyser() { return hasGeyser; }
+    public void setHasGeyser(Boolean hasGeyser) { this.hasGeyser = hasGeyser; }
+
+    public Boolean getHasHousekeeping() { return hasHousekeeping; }
+    public void setHasHousekeeping(Boolean hasHousekeeping) { this.hasHousekeeping = hasHousekeeping; }
+
+    public String getCustomFeatures() { return customFeatures; }
+    public void setCustomFeatures(String customFeatures) { this.customFeatures = customFeatures; }
 }

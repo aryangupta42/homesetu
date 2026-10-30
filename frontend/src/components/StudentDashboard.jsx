@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
-import { Clock, CheckCircle2, XCircle, FileText, MapPin, Calendar, IndianRupee, ShieldCheck, ArrowRight, User } from 'lucide-react';
+import { Clock, CheckCircle2, XCircle, FileText, MapPin, Calendar, IndianRupee, ShieldCheck, ArrowRight, User, AlertTriangle, MessageSquare, Bot, Sparkles } from 'lucide-react';
 import ConfirmationSlipModal from './ConfirmationSlipModal';
+import PgDetailsModal from './PgDetailsModal';
+import AskAiModal from './AskAiModal';
+import AiStudentAgent from './AiStudentAgent';
 
-export default function StudentDashboard({ onExploreClick, openAuthModal }) {
+export default function StudentDashboard({ onExploreClick, openAuthModal, onOpenFeedback }) {
   const { currentUser, logout } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [visits, setVisits] = useState([]);
+  const [allPgs, setAllPgs] = useState([]);
   const [selectedBookingForSlip, setSelectedBookingForSlip] = useState(null);
+  const [selectedPgDetails, setSelectedPgDetails] = useState(null);
+  const [showAskAiModal, setShowAskAiModal] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState('bookings');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,8 +27,10 @@ export default function StudentDashboard({ onExploreClick, openAuthModal }) {
     setLoading(false);
     const data = await api.getStudentBookings(currentUser.id);
     const visitList = await api.getVisits();
+    const pgsList = await api.getPgs({});
     setBookings(data);
     setVisits(visitList);
+    setAllPgs(pgsList);
   };
 
   // Case 1: Unauthenticated visitor
@@ -120,183 +129,272 @@ export default function StudentDashboard({ onExploreClick, openAuthModal }) {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            onClick={() => setActiveSubTab(activeSubTab === 'ai-agent' ? 'bookings' : 'ai-agent')}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs transition-all flex items-center gap-1.5 shadow-lg shadow-amber-500/25 cursor-pointer hover:scale-105 active:scale-95"
+          >
+            <Bot className="w-4 h-4 text-slate-950" />
+            <span>{activeSubTab === 'ai-agent' ? 'View My Bookings' : 'Ask AI Agent'}</span>
+          </button>
+
+          {onOpenFeedback && (
+            <button
+              onClick={() => onOpenFeedback('COMPLAINT')}
+              className="px-4 py-2.5 rounded-xl bg-red-950/60 hover:bg-red-900/80 text-red-200 border border-red-700/60 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-md cursor-pointer"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+              <span>Report Grievance / Issue</span>
+            </button>
+          )}
+
+          <button
+            onClick={onExploreClick}
+            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors flex items-center gap-2 shadow-md cursor-pointer"
+          >
+            <span>Find More PGs</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Sub-navigation Switcher: My Bookings & Visits VS Dedicated Ask AI Agent */}
+      <div className="flex flex-wrap items-center gap-3 border-b border-teal-800/80 pb-3">
         <button
-          onClick={onExploreClick}
-          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors flex items-center gap-2 shadow-md shrink-0"
+          onClick={() => setActiveSubTab('bookings')}
+          className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+            activeSubTab === 'bookings'
+              ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 ring-2 ring-amber-400/40'
+              : 'bg-[#0b2b32] text-teal-300 hover:text-white border border-[#16515c]'
+          }`}
         >
-          <span>Find More PGs</span>
-          <ArrowRight className="w-4 h-4" />
+          <FileText className="w-4 h-4" />
+          <span>My Applications & Scheduled Visits</span>
+          <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+            activeSubTab === 'bookings' ? 'bg-slate-950/25 text-slate-950' : 'bg-teal-900 text-teal-200'
+          }`}>
+            {bookings.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('ai-agent')}
+          className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+            activeSubTab === 'ai-agent'
+              ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 font-black ring-2 ring-amber-400/40'
+              : 'bg-[#0b2b32] text-teal-300 hover:text-white border border-[#16515c]'
+          }`}
+        >
+          <Bot className="w-4 h-4 text-amber-400" />
+          <span>🤖 Ask AI Agent (Smart PG Matcher)</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-extrabold uppercase">
+            Match Stays
+          </span>
         </button>
       </div>
 
-      {/* Booking Requests List */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-bold text-white">My Booking Requests</h3>
-            <p className="text-xs text-teal-300/70">
-              Structured application flow with real-time status and official Confirmation IDs
-            </p>
-          </div>
-          <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-            {bookings.length} Applications
-          </span>
-        </div>
+      {activeSubTab === 'bookings' ? (
+        <>
+          {/* Booking Requests List */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-white">My Booking Requests</h3>
+                <p className="text-xs text-teal-300/70">
+                  Structured application flow with real-time status and official Confirmation IDs
+                </p>
+              </div>
+              <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+                {bookings.length} Applications
+              </span>
+            </div>
 
-        {bookings.length === 0 ? (
-          <div className="bg-[#0b2b32] border border-[#16515c] rounded-2xl p-10 text-center space-y-3">
-            <p className="text-sm text-teal-300">You haven't submitted any booking requests yet.</p>
-            <button
-              onClick={onExploreClick}
-              className="px-5 py-2 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl hover:bg-amber-400"
-            >
-              Explore PGs Now
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {bookings.map((booking) => (
-              <div
-                key={booking.id}
-                className="bg-[#0c3139] border border-[#17525e] hover:border-teal-500/60 rounded-2xl p-5 sm:p-6 transition-all shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-6"
-              >
-                {/* Left side info */}
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="text-lg font-bold text-white">{booking.pgName}</h4>
-                    <span className="text-xs text-teal-300/70 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-amber-400" />
-                      {booking.pgLocality}, {booking.pgCity}
-                    </span>
-                  </div>
+            {bookings.length === 0 ? (
+              <div className="bg-[#0b2b32] border border-[#16515c] rounded-2xl p-10 text-center space-y-3">
+                <p className="text-sm text-teal-300">You haven't submitted any booking requests yet.</p>
+                <button
+                  onClick={onExploreClick}
+                  className="px-5 py-2 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl hover:bg-amber-400"
+                >
+                  Explore PGs Now
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {bookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="bg-[#0c3139] border border-[#17525e] hover:border-teal-500/60 rounded-2xl p-5 sm:p-6 transition-all shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-6"
+                  >
+                    {/* Left side info */}
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-lg font-bold text-white">{booking.pgName}</h4>
+                        <span className="text-xs text-teal-300/70 flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                          {booking.pgLocality}, {booking.pgCity}
+                        </span>
+                      </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-teal-200/90">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-teal-400" />
-                      Move-in: <strong>{booking.moveInDate}</strong> ({booking.durationMonths} months)
-                    </span>
-                    <span>Room: <strong>{booking.roomType}</strong></span>
-                    <span className="text-amber-400 font-bold">
-                      ₹{booking.monthlyRent?.toLocaleString('en-IN')}/mo
-                    </span>
-                  </div>
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-teal-200/90">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5 text-teal-400" />
+                          Move-in: <strong>{booking.moveInDate}</strong> ({booking.durationMonths} months)
+                        </span>
+                        <span>Room: <strong>{booking.roomType}</strong></span>
+                        <span className="text-amber-400 font-bold">
+                          ₹{booking.monthlyRent?.toLocaleString('en-IN')}/mo
+                        </span>
+                      </div>
 
-                  {booking.message && (
-                    <p className="text-xs text-teal-300/70 italic">
-                      "{booking.message}"
-                    </p>
-                  )}
+                      {booking.message && (
+                        <p className="text-xs text-teal-300/70 italic">
+                          "{booking.message}"
+                        </p>
+                      )}
 
-                  {booking.ownerNotes && (
-                    <div className="text-xs p-2.5 rounded-lg bg-teal-950/60 border border-teal-800 text-teal-200">
-                      <span className="font-semibold text-teal-300">Owner Feedback: </span>
-                      {booking.ownerNotes}
-                    </div>
-                  )}
-                </div>
-
-                {/* Right side status & action */}
-                <div className="flex flex-col sm:items-end gap-3 shrink-0">
-                  {/* Status Badge */}
-                  {booking.status === 'ACCEPTED' ? (
-                    <div className="flex flex-col sm:items-end gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/40">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        Approved by Owner!
-                      </span>
-                      {booking.confirmationId && (
-                        <div className="text-right">
-                          <span className="text-[10px] text-teal-300/70 uppercase tracking-wider block">Confirmation ID</span>
-                          <span className="text-base font-mono font-extrabold text-amber-400">
-                            {booking.confirmationId}
-                          </span>
+                      {booking.ownerNotes && (
+                        <div className="text-xs p-2.5 rounded-lg bg-teal-950/60 border border-teal-800 text-teal-200">
+                          <span className="font-semibold text-teal-300">Owner Feedback: </span>
+                          {booking.ownerNotes}
                         </div>
                       )}
-                      <button
-                        onClick={() => setSelectedBookingForSlip(booking)}
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5"
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        View Confirmation Slip
-                      </button>
                     </div>
-                  ) : booking.status === 'REJECTED' ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-xs font-bold border border-red-500/40">
-                      <XCircle className="w-4 h-4 text-red-400" />
-                      Declined by Owner
-                    </span>
-                  ) : (
-                    <div className="flex flex-col sm:items-end gap-1.5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/40">
-                        <Clock className="w-4 h-4 text-amber-400 animate-spin" />
-                        Pending Owner Approval
-                      </span>
-                      <p className="text-[11px] text-teal-400/60 max-w-[200px] sm:text-right">
-                        Confirmation ID is generated once the owner accepts your request.
-                      </p>
+
+                    {/* Right side status & action */}
+                    <div className="flex flex-col sm:items-end gap-3 shrink-0">
+                      {/* Status Badge */}
+                      {booking.status === 'ACCEPTED' ? (
+                        <div className="flex flex-col sm:items-end gap-2">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/40">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            Approved by Owner!
+                          </span>
+                          {booking.confirmationId && (
+                            <div className="text-right">
+                              <span className="text-[10px] text-teal-300/70 uppercase tracking-wider block">Confirmation ID</span>
+                              <span className="text-base font-mono font-extrabold text-amber-400">
+                                {booking.confirmationId}
+                              </span>
+                            </div>
+                          )}
+                          <button
+                            onClick={() => setSelectedBookingForSlip(booking)}
+                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            View Confirmation Slip
+                          </button>
+                        </div>
+                      ) : booking.status === 'REJECTED' ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-xs font-bold border border-red-500/40">
+                          <XCircle className="w-4 h-4 text-red-400" />
+                          Declined by Owner
+                        </span>
+                      ) : (
+                        <div className="flex flex-col sm:items-end gap-1.5">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/40">
+                            <Clock className="w-4 h-4 text-amber-400 animate-spin" />
+                            Pending Owner Approval
+                          </span>
+                          <p className="text-[11px] text-teal-400/60 max-w-[200px] sm:text-right">
+                            Confirmation ID is generated once the owner accepts your request.
+                          </p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Scheduled In-Person / Video Visits */}
-      <div className="space-y-4 pt-6 border-t border-teal-800/60">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-bold text-white">Scheduled PG Visits</h3>
-            <p className="text-xs text-teal-300/70">
-              Direct owner walk-in tours & 360° video appointments with verified pass codes
-            </p>
-          </div>
-          <span className="text-xs font-bold text-teal-400 bg-teal-500/10 px-3 py-1 rounded-full border border-teal-500/20">
-            {visits.length} Visit Passes
-          </span>
-        </div>
-
-        {visits.length === 0 ? (
-          <div className="bg-[#0b2b32] border border-[#16515c] rounded-2xl p-6 text-center text-xs text-teal-300">
-            No visits scheduled yet. Click "Schedule Visit" on any PG page to book a zero-cost tour with the owner.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {visits.map(v => (
-              <div key={v.id} className="p-5 rounded-2xl bg-[#0c3139] border border-[#17525e] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm">{v.pgName}</span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-teal-900 text-teal-200 text-[10px] font-bold border border-teal-700">
-                    {v.visitType}
-                  </span>
-                </div>
-
-                <div className="text-xs text-teal-200 space-y-1">
-                  <p>📅 Date: <strong>{v.visitDate}</strong> • ⏰ <strong>{v.timeSlot}</strong></p>
-                  <p>📞 Contact: {v.studentPhone}</p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-[#082227] border border-teal-800 flex items-center justify-between text-xs">
-                  <div>
-                    <span className="text-[10px] text-teal-400 uppercase font-semibold">Pass Code:</span>
-                    <div className="font-mono font-black text-amber-400 text-sm">{v.passCode}</div>
                   </div>
-                  <span className="text-emerald-400 font-bold flex items-center gap-1 text-[11px]">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> 0% Brokerage
-                  </span>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
+
+          {/* Scheduled In-Person / Video Visits */}
+          <div className="space-y-4 pt-6 border-t border-teal-800/60">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-white">Scheduled PG Visits</h3>
+                <p className="text-xs text-teal-300/70">
+                  Direct owner walk-in tours & 360° video appointments with verified pass codes
+                </p>
+              </div>
+              <span className="text-xs font-bold text-teal-400 bg-teal-500/10 px-3 py-1 rounded-full border border-teal-500/20">
+                {visits.length} Visit Passes
+              </span>
+            </div>
+
+            {visits.length === 0 ? (
+              <div className="bg-[#0b2b32] border border-[#16515c] rounded-2xl p-6 text-center text-xs text-teal-300">
+                No visits scheduled yet. Click "Schedule Visit" on any PG page to book a zero-cost tour with the owner.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {visits.map(v => (
+                  <div key={v.id} className="p-5 rounded-2xl bg-[#0c3139] border border-[#17525e] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-white text-sm">{v.pgName}</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-teal-900 text-teal-200 text-[10px] font-bold border border-teal-700">
+                        {v.visitType}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-teal-200 space-y-1">
+                      <p>📅 Date: <strong>{v.visitDate}</strong> • ⏰ <strong>{v.timeSlot}</strong></p>
+                      <p>📞 Contact: {v.studentPhone}</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-[#082227] border border-teal-800 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-[10px] text-teal-400 uppercase font-semibold">Pass Code:</span>
+                        <div className="font-mono font-black text-amber-400 text-sm">{v.passCode}</div>
+                      </div>
+                      <span className="text-emerald-400 font-bold flex items-center gap-1 text-[11px]">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> 0% Brokerage
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <AiStudentAgent
+            currentUser={currentUser}
+            allPgs={allPgs}
+            onSelectPg={(pg) => setSelectedPgDetails(pg)}
+          />
+        </div>
+      )}
 
       {/* Confirmation Slip Modal */}
       {selectedBookingForSlip && (
         <ConfirmationSlipModal
           booking={selectedBookingForSlip}
           onClose={() => setSelectedBookingForSlip(null)}
+        />
+      )}
+
+      {/* Ask AI Stay Matcher Modal */}
+      {showAskAiModal && (
+        <AskAiModal
+          isOpen={showAskAiModal}
+          onClose={() => setShowAskAiModal(false)}
+          currentUser={currentUser}
+          allPgs={allPgs}
+          onSelectPg={(pg) => setSelectedPgDetails(pg)}
+        />
+      )}
+
+      {/* PG Details & Direct Booking Modal from AI Agent */}
+      {selectedPgDetails && (
+        <PgDetailsModal
+          pg={selectedPgDetails}
+          onClose={() => {
+            setSelectedPgDetails(null);
+            loadData();
+          }}
         />
       )}
     </div>

@@ -4,31 +4,123 @@ import { api } from '../api';
 const AuthContext = createContext();
 
 export const DEMO_USERS = {
-  student: {
-    id: 1,
-    fullName: "Rahul Verma",
-    email: "student@homesetu.com",
-    role: "STUDENT",
-    phone: "+91 98765 00001",
-    college: "Pune Engineering College (COEP)",
-    city: "Pune"
-  },
-  owner: {
-    id: 10,
-    fullName: "Ramesh Sharma",
-    email: "owner@homesetu.com",
-    role: "OWNER",
-    phone: "+91 91234 56789",
-    city: "Pune",
-    isVerified: true
-  },
+  students: [
+    {
+      id: 6,
+      fullName: "Aarav Sharma",
+      email: "student1@homesetu.demo",
+      password: "Student@123",
+      role: "STUDENT",
+      phone: "+91 98111 20001",
+      college: "ABES Engineering College, Ghaziabad",
+      studentId: "ABES-2023-CS-042",
+      city: "Ghaziabad"
+    },
+    {
+      id: 7,
+      fullName: "Riya Verma",
+      email: "student2@homesetu.demo",
+      password: "Student@123",
+      role: "STUDENT",
+      phone: "+91 98111 20002",
+      college: "AKGEC Ghaziabad",
+      studentId: "AKG-2023-IT-089",
+      city: "Ghaziabad"
+    },
+    {
+      id: 8,
+      fullName: "Kabir Mehta",
+      email: "student3@homesetu.demo",
+      password: "Student@123",
+      role: "STUDENT",
+      phone: "+91 98111 20003",
+      college: "KIET Group of Institutions, Ghaziabad",
+      studentId: "KIET-2024-ECE-115",
+      city: "Ghaziabad"
+    },
+    {
+      id: 9,
+      fullName: "Ananya Gupta",
+      email: "student4@homesetu.demo",
+      password: "Student@123",
+      role: "STUDENT",
+      phone: "+91 98111 20004",
+      college: "Galgotias University, Greater Noida",
+      studentId: "GU-2023-BBA-204",
+      city: "Greater Noida"
+    },
+    {
+      id: 10,
+      fullName: "Rohan Malhotra",
+      email: "student5@homesetu.demo",
+      password: "Student@123",
+      role: "STUDENT",
+      phone: "+91 98111 20005",
+      college: "IMS Ghaziabad (UC Campus)",
+      studentId: "IMS-2024-BCA-067",
+      city: "Ghaziabad"
+    }
+  ],
+  owners: [
+    {
+      id: 11,
+      fullName: "Vikram Chauhan",
+      email: "owner1@homesetu.demo",
+      password: "Owner@123",
+      role: "OWNER",
+      phone: "+91 98222 30001",
+      propertyName: "Chauhan Residency (5 PGs)",
+      city: "Crossings Republik, Ghaziabad"
+    },
+    {
+      id: 12,
+      fullName: "Sunil Aggarwal",
+      email: "owner2@homesetu.demo",
+      password: "Owner@123",
+      role: "OWNER",
+      phone: "+91 98222 30002",
+      propertyName: "Aggarwal PG Homes (5 PGs)",
+      city: "Indirapuram, Ghaziabad"
+    },
+    {
+      id: 13,
+      fullName: "Rajesh Tyagi",
+      email: "owner3@homesetu.demo",
+      password: "Owner@123",
+      role: "OWNER",
+      phone: "+91 98222 30003",
+      propertyName: "Tyagi Student Stays (5 PGs)",
+      city: "Opp. ABES Gate, Ghaziabad"
+    },
+    {
+      id: 14,
+      fullName: "Deepak Singhal",
+      email: "owner4@homesetu.demo",
+      password: "Owner@123",
+      role: "OWNER",
+      phone: "+91 98222 30004",
+      propertyName: "Singhal Comfort Living (5 PGs)",
+      city: "Raj Nagar Ext & KIET"
+    },
+    {
+      id: 15,
+      fullName: "Pooja Sharma",
+      email: "owner5@homesetu.demo",
+      password: "Owner@123",
+      role: "OWNER",
+      phone: "+91 98222 30005",
+      propertyName: "Sharma Executive Living (5 PGs)",
+      city: "Noida Sector 62 & Gr. Noida"
+    }
+  ],
   admin: {
-    id: 99,
-    fullName: "HomeSetu Admin",
-    email: "admin@homesetu.com",
+    id: 5,
+    fullName: "HomeSetu Platform Admin",
+    email: "admin@homesetu.demo",
+    password: "Admin@123",
     role: "ADMIN",
-    phone: "+91 99999 88888",
-    city: "Pune"
+    phone: "+91 99999 00000",
+    city: "Delhi NCR"
   }
 };
 

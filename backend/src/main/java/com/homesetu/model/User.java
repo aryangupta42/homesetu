@@ -25,6 +25,8 @@ public class User {
 
     private String phone;
     private String college;
+    private String studentId;
+    private String propertyName;
     private String city;
 
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -38,6 +40,19 @@ public class User {
         this.role = role;
         this.phone = phone;
         this.college = college;
+        this.city = city;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public User(String fullName, String email, String password, String role, String phone, String college, String studentId, String propertyName, String city) {
+        this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.phone = phone;
+        this.college = college;
+        this.studentId = studentId;
+        this.propertyName = propertyName;
         this.city = city;
         this.createdAt = LocalDateTime.now();
     }
@@ -62,6 +77,12 @@ public class User {
 
     public String getCollege() { return college; }
     public void setCollege(String college) { this.college = college; }
+
+    public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
+
+    public String getPropertyName() { return propertyName; }
+    public void setPropertyName(String propertyName) { this.propertyName = propertyName; }
 
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }

@@ -15,6 +15,8 @@ public class RegisterRequest {
     private String role = "STUDENT"; // "STUDENT" or "OWNER"
     private String phone;
     private String college;
+    private String studentId;
+    private String propertyName;
     private String city;
 
     public RegisterRequest() {}
@@ -36,6 +38,12 @@ public class RegisterRequest {
 
     public String getCollege() { return college; }
     public void setCollege(String college) { this.college = college; }
+
+    public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
+
+    public String getPropertyName() { return propertyName; }
+    public void setPropertyName(String propertyName) { this.propertyName = propertyName; }
 
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }

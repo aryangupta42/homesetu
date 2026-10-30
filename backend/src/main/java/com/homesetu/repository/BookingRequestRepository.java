@@ -13,4 +13,5 @@ public interface BookingRequestRepository extends JpaRepository<BookingRequest, 
     List<BookingRequest> findByOwnerIdOrderByCreatedAtDesc(Long ownerId);
     List<BookingRequest> findByPgListingIdOrderByCreatedAtDesc(Long pgListingId);
     Optional<BookingRequest> findByConfirmationId(String confirmationId);
+    boolean existsByConfirmationId(String confirmationId);
 }

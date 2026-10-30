@@ -30,7 +30,9 @@ public class UserService {
                 req.getRole() != null ? req.getRole().toUpperCase() : "STUDENT",
                 req.getPhone(),
                 req.getCollege(),
-                req.getCity()
+                req.getStudentId(),
+                req.getPropertyName(),
+                req.getCity() != null ? req.getCity() : "Ghaziabad"
         );
 
         user = userRepository.save(user);

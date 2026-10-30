@@ -923,6 +923,73 @@ function saveVisitsToStorage() {
   localStorage.setItem('homesetu_visits', JSON.stringify(mockVisits));
 }
 
+const INITIAL_FEEDBACKS = [
+  {
+    id: 1,
+    ticketId: "HS-TKT-10821",
+    type: "COMPLAINT",
+    category: "Maintenance & WiFi",
+    priority: "URGENT",
+    subject: "WiFi router on 2nd floor disconnecting intermittently during online college tests",
+    description: "The mesh extender on 2nd floor loses connection every 20-30 minutes. Multiple ABES students taking hackathons and online submissions face disconnection. Please inspect the access point router.",
+    pgId: 1,
+    pgName: "Royal Palms Student Living — Crossings Republik",
+    submitterName: "Aarav Sharma",
+    submitterEmail: "student1@homesetu.demo",
+    submitterPhone: "+91 98765 43210",
+    submitterRole: "STUDENT",
+    status: "PENDING",
+    createdAt: "2026-10-28T14:30:00Z"
+  },
+  {
+    id: 2,
+    ticketId: "HS-TKT-10822",
+    type: "COMPLAINT",
+    category: "Food & Mess Quality",
+    priority: "HIGH",
+    subject: "Request to improve evening dinner menu variety and fruit options",
+    description: "Dinner menu has been repeating same curry 3 days a week. Request the mess supervisor to provide fresh fruits or curd on weekdays.",
+    pgId: 3,
+    pgName: "Green View Executive Co-ed PG — Panchsheel Wellington",
+    submitterName: "Priya Verma",
+    submitterEmail: "student2@homesetu.demo",
+    submitterPhone: "+91 98765 43211",
+    submitterRole: "STUDENT",
+    status: "IN_REVIEW",
+    adminResponse: "HomeSetu Grievance Officer contacted PG Owner Vikram Chauhan. Kitchen supervisor has revised weekly dinner rotation with seasonal fruits on Tue/Thu.",
+    createdAt: "2026-10-27T11:15:00Z"
+  },
+  {
+    id: 3,
+    ticketId: "HS-TKT-10823",
+    type: "FEEDBACK",
+    category: "Platform Experience",
+    priority: "MEDIUM",
+    subject: "Great verification workflow! Would love automated monthly rent collection receipts",
+    description: "The verification process was smooth. It would be awesome if owners could generate standard PDF rent receipts automatically for students claiming HRA/college reimbursement.",
+    pgId: 1,
+    pgName: "Royal Palms Student Living — Crossings Republik",
+    submitterName: "Vikram Chauhan",
+    submitterEmail: "owner1@homesetu.demo",
+    submitterPhone: "+91 98111 22201",
+    submitterRole: "OWNER",
+    status: "RESOLVED",
+    adminResponse: "Feature request approved and logged into HomeSetu v2.2 roadmap. Thank you Vikram ji for partnering with us!",
+    createdAt: "2026-10-26T09:40:00Z"
+  }
+];
+
+function loadSavedFeedbacks() {
+  const saved = localStorage.getItem('homesetu_feedbacks');
+  return saved ? JSON.parse(saved) : INITIAL_FEEDBACKS;
+}
+
+let mockFeedbacks = loadSavedFeedbacks();
+
+function saveFeedbacksToStorage() {
+  localStorage.setItem('homesetu_feedbacks', JSON.stringify(mockFeedbacks));
+}
+
 export const api = {
   // Authentication with Strict Credential & Role Verification
   login: async (email, password, expectedRole = null) => {
@@ -956,13 +1023,61 @@ export const api = {
       return { success: true, user: registeredMatch };
     }
 
-    // 2. Pre-seeded Verified Accounts
+    // 2. Pre-seeded Verified Demo Accounts
+    const demoStudents = [
+      { id: 6, fullName: "Aarav Sharma", email: "student1@homesetu.demo", password: "Student@123", role: "STUDENT", college: "ABES Engineering College, Ghaziabad", phone: "+91 98111 20001", studentId: "ABES-2023-CS-042", city: "Ghaziabad" },
+      { id: 7, fullName: "Riya Verma", email: "student2@homesetu.demo", password: "Student@123", role: "STUDENT", college: "AKGEC Ghaziabad", phone: "+91 98111 20002", studentId: "AKG-2023-IT-089", city: "Ghaziabad" },
+      { id: 8, fullName: "Kabir Mehta", email: "student3@homesetu.demo", password: "Student@123", role: "STUDENT", college: "KIET Group of Institutions, Ghaziabad", phone: "+91 98111 20003", studentId: "KIET-2024-ECE-115", city: "Ghaziabad" },
+      { id: 9, fullName: "Ananya Gupta", email: "student4@homesetu.demo", password: "Student@123", role: "STUDENT", college: "Galgotias University, Greater Noida", phone: "+91 98111 20004", studentId: "GU-2023-BBA-204", city: "Greater Noida" },
+      { id: 10, fullName: "Rohan Malhotra", email: "student5@homesetu.demo", password: "Student@123", role: "STUDENT", college: "IMS Ghaziabad (UC Campus)", phone: "+91 98111 20005", studentId: "IMS-2024-BCA-067", city: "Ghaziabad" }
+    ];
+
+    const demoOwners = [
+      { id: 11, fullName: "Vikram Chauhan", email: "owner1@homesetu.demo", password: "Owner@123", role: "OWNER", phone: "+91 98222 30001", propertyName: "Chauhan Residency (5 PGs)", city: "Crossings Republik, Ghaziabad", isVerified: true },
+      { id: 12, fullName: "Sunil Aggarwal", email: "owner2@homesetu.demo", password: "Owner@123", role: "OWNER", phone: "+91 98222 30002", propertyName: "Aggarwal PG Homes (5 PGs)", city: "Indirapuram, Ghaziabad", isVerified: true },
+      { id: 13, fullName: "Rajesh Tyagi", email: "owner3@homesetu.demo", password: "Owner@123", role: "OWNER", phone: "+91 98222 30003", propertyName: "Tyagi Student Accommodations (5 PGs)", city: "Opp. ABES Gate, Ghaziabad", isVerified: true },
+      { id: 14, fullName: "Deepak Singhal", email: "owner4@homesetu.demo", password: "Owner@123", role: "OWNER", phone: "+91 98222 30004", propertyName: "Singhal Comfort Living (5 PGs)", city: "Raj Nagar Ext & KIET Area", isVerified: true },
+      { id: 15, fullName: "Pooja Sharma", email: "owner5@homesetu.demo", password: "Owner@123", role: "OWNER", phone: "+91 98222 30005", propertyName: "Sharma Executive Living (5 PGs)", city: "Noida Sector 62 & Gr. Noida", isVerified: true }
+    ];
+
+    const matchStudent = demoStudents.find(s => s.email.toLowerCase() === cleanEmail);
+    if (matchStudent) {
+      if (cleanPassword !== matchStudent.password) {
+        return { success: false, message: "Incorrect password. (Demo password is Student@123)" };
+      }
+      if (expectedRole && expectedRole !== 'STUDENT') {
+        return { success: false, message: "Access Denied: This is a Student account. Please login through Student portal." };
+      }
+      return { success: true, user: matchStudent };
+    }
+
+    const matchOwner = demoOwners.find(o => o.email.toLowerCase() === cleanEmail);
+    if (matchOwner) {
+      if (cleanPassword !== matchOwner.password) {
+        return { success: false, message: "Incorrect password. (Demo password is Owner@123)" };
+      }
+      if (expectedRole && expectedRole !== 'OWNER') {
+        return { success: false, message: "Access Denied: This is a PG Owner account. Please login through Owner portal." };
+      }
+      return { success: true, user: matchOwner };
+    }
+
+    if (cleanEmail === "admin@homesetu.demo" || cleanEmail === "admin@homesetu.com") {
+      if (cleanPassword !== "Admin@123" && cleanPassword !== "admin123" && cleanPassword !== "ADMIN2026") {
+        return { success: false, message: "Incorrect password. (Demo admin password is Admin@123)" };
+      }
+      if (expectedRole && expectedRole !== 'ADMIN') {
+        return { success: false, message: "Access Denied: This is an Administrator account. Please login through Admin portal." };
+      }
+      return {
+        success: true,
+        user: { id: 5, fullName: "HomeSetu Platform Admin", email: "admin@homesetu.demo", role: "ADMIN", city: "Delhi NCR", phone: "+91 99999 00000" }
+      };
+    }
+
     if (cleanEmail === "student@homesetu.com") {
       if (cleanPassword !== "123456") {
         return { success: false, message: "Incorrect password. (Default demo student password is 123456)" };
-      }
-      if (expectedRole && expectedRole !== 'STUDENT') {
-        return { success: false, message: "Access Denied: student@homesetu.com is a Student account. Please login through the Student portal." };
       }
       return {
         success: true,
@@ -972,23 +1087,9 @@ export const api = {
       if (cleanPassword !== "123456") {
         return { success: false, message: "Incorrect password. (Default demo owner password is 123456)" };
       }
-      if (expectedRole && expectedRole !== 'OWNER') {
-        return { success: false, message: "Access Denied: owner@homesetu.com is a PG Owner account. Please login through the PG Owner portal." };
-      }
       return {
         success: true,
         user: { id: 10, fullName: "Ramesh Sharma", email: "owner@homesetu.com", role: "OWNER", city: "Pune", phone: "+91 91234 56789", isVerified: true }
-      };
-    } else if (cleanEmail === "admin@homesetu.com") {
-      if (cleanPassword !== "admin123" && cleanPassword !== "ADMIN2026") {
-        return { success: false, message: "Incorrect password. (Default demo admin password is admin123)" };
-      }
-      if (expectedRole && expectedRole !== 'ADMIN') {
-        return { success: false, message: "Access Denied: admin@homesetu.com is an Administrator account. Please login through the Admin portal." };
-      }
-      return {
-        success: true,
-        user: { id: 99, fullName: "HomeSetu Admin", email: "admin@homesetu.com", role: "ADMIN", city: "Pune", phone: "+91 99999 88888" }
       };
     }
 
@@ -1455,5 +1556,84 @@ export const api = {
       totalBookings: mockBookings.length,
       totalVisits: mockVisits.length
     };
+  },
+
+  // Update existing PG Listing (features, amenities, rules)
+  updatePg: async (pgId, updatedData) => {
+    try {
+      const res = await fetch(`${API_BASE}/pgs/${pgId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn("Backend API fallback for updatePg:", e);
+    }
+
+    const idx = mockPgs.findIndex(p => p.id === Number(pgId));
+    if (idx !== -1) {
+      mockPgs[idx] = { ...mockPgs[idx], ...updatedData };
+      savePgsToStorage();
+      return mockPgs[idx];
+    }
+    return updatedData;
+  },
+
+  // Feedback & Complaint Services
+  submitFeedbackComplaint: async (data) => {
+    try {
+      const res = await fetch(`${API_BASE}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn("Backend API fallback for submitFeedbackComplaint:", e);
+    }
+
+    const newTicket = {
+      id: Date.now(),
+      ticketId: 'HS-TKT-' + Math.floor(10000 + Math.random() * 90000),
+      createdAt: new Date().toISOString(),
+      status: 'PENDING',
+      ...data
+    };
+    mockFeedbacks.unshift(newTicket);
+    saveFeedbacksToStorage();
+    return newTicket;
+  },
+
+  getFeedbackComplaints: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/feedback`);
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn("Backend API fallback for getFeedbackComplaints:", e);
+    }
+    return mockFeedbacks;
+  },
+
+  updateFeedbackStatus: async (id, status, adminResponse = '') => {
+    try {
+      const res = await fetch(`${API_BASE}/feedback/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, adminResponse })
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn("Backend API fallback for updateFeedbackStatus:", e);
+    }
+
+    const item = mockFeedbacks.find(f => f.id === Number(id));
+    if (item) {
+      item.status = status;
+      item.adminResponse = adminResponse;
+      item.resolvedAt = new Date().toISOString();
+      saveFeedbacksToStorage();
+    }
+    return item;
   }
 };

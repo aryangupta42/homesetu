@@ -3,7 +3,6 @@ import { AuthProvider } from './context/AuthContext';
 import { api } from './api';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
-import ProblemSolution from './components/ProblemSolution';
 import HowItWorks from './components/HowItWorks';
 import PgCard from './components/PgCard';
 import PgFilterSidebar from './components/PgFilterSidebar';
@@ -13,13 +12,40 @@ import StudentDashboard from './components/StudentDashboard';
 import OwnerDashboard from './components/OwnerDashboard';
 import AdminPortal from './components/AdminPortal';
 import AuthModal from './components/AuthModal';
+import WelcomeScreen from './components/WelcomeScreen';
+import FeedbackModal from './components/FeedbackModal';
 import Footer from './components/Footer';
 import { Search, SlidersHorizontal, ArrowUpDown, Frown } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('explore'); // 'explore' | 'how-it-works' | 'problem-solution' | 'student-dashboard' | 'owner-dashboard' | 'admin'
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('homesetu_user');
+      if (savedUser) {
+        const u = JSON.parse(savedUser);
+        if (u.role === 'STUDENT') return 'student-dashboard';
+        if (u.role === 'OWNER') return 'owner-dashboard';
+        if (u.role === 'ADMIN') return 'admin';
+      }
+    } catch (e) {}
+    return 'explore';
+  });
+  
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(() => {
+    // If not logged in, ALWAYS show Welcome Screen as the primary gateway!
+    const user = localStorage.getItem('homesetu_user');
+    return !user;
+  });
   const [pgs, setPgs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackDefaultType, setFeedbackDefaultType] = useState('COMPLAINT');
+  const [adminSubTab, setAdminSubTab] = useState('verifications');
+
+  const openFeedbackModal = (type = 'COMPLAINT') => {
+    setFeedbackDefaultType(type);
+    setShowFeedbackModal(true);
+  };
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -89,6 +115,38 @@ export default function App() {
     setCompareList(compareList.filter(item => item.id !== pgId));
   };
 
+  if (showWelcomeScreen) {
+    return (
+      <AuthProvider>
+        <WelcomeScreen
+          onGetStarted={() => {
+            openAuthModal('login', null);
+          }}
+          onSelectRole={(role) => {
+            openAuthModal('login', role);
+          }}
+          onExploreAsGuest={() => {
+            setShowWelcomeScreen(false);
+            setActiveTab('explore');
+          }}
+        />
+        {authModalConfig.isOpen && (
+          <AuthModal
+            initialMode={authModalConfig.mode}
+            initialRole={authModalConfig.role}
+            onClose={() => setAuthModalConfig(prev => ({ ...prev, isOpen: false }))}
+            onAuthSuccess={(user) => {
+              setShowWelcomeScreen(false);
+              if (user.role === 'STUDENT') setActiveTab('student-dashboard');
+              else if (user.role === 'OWNER') setActiveTab('owner-dashboard');
+              else if (user.role === 'ADMIN') setActiveTab('admin');
+            }}
+          />
+        )}
+      </AuthProvider>
+    );
+  }
+
   return (
     <AuthProvider>
       <div className="min-h-screen bg-[#081d21] text-slate-100 flex flex-col selection:bg-amber-500 selection:text-slate-950">
@@ -99,6 +157,12 @@ export default function App() {
           compareList={compareList}
           openCompareModal={() => setShowCompareModal(true)}
           openAuthModal={openAuthModal}
+          onOpenWelcome={() => setShowWelcomeScreen(true)}
+          onOpenFeedback={openFeedbackModal}
+          onNavigateAdminTab={(subTab) => {
+            setActiveTab('admin');
+            setAdminSubTab(subTab || 'feedbacks');
+          }}
         />
 
         {/* Main Content Area based on activeTab */}
@@ -200,14 +264,11 @@ export default function App() {
             <HowItWorks />
           )}
 
-          {activeTab === 'problem-solution' && (
-            <ProblemSolution />
-          )}
-
           {activeTab === 'student-dashboard' && (
             <StudentDashboard
               onExploreClick={(tab) => setActiveTab(tab || 'explore')}
               openAuthModal={openAuthModal}
+              onOpenFeedback={openFeedbackModal}
             />
           )}
 
@@ -215,6 +276,7 @@ export default function App() {
             <OwnerDashboard
               onExploreClick={(tab) => setActiveTab(tab || 'explore')}
               openAuthModal={openAuthModal}
+              onOpenFeedback={openFeedbackModal}
             />
           )}
 
@@ -222,6 +284,8 @@ export default function App() {
             <AdminPortal
               onExploreClick={(tab) => setActiveTab(tab || 'explore')}
               openAuthModal={openAuthModal}
+              initialSubTab={adminSubTab}
+              onSubTabChange={setAdminSubTab}
             />
           )}
         </main>
@@ -247,6 +311,32 @@ export default function App() {
           />
         )}
 
+        {/* Floating Compare Action Dock when user has selected PGs */}
+        {compareList.length > 0 && (
+          <div className="fixed bottom-6 right-6 z-40 bg-[#09252c]/95 backdrop-blur-md border border-amber-500/70 shadow-2xl rounded-2xl p-3 px-4 flex items-center gap-3 animate-in slide-in-from-bottom-5">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center">
+                {compareList.length}
+              </span>
+              <span className="text-xs font-bold text-white hidden sm:inline">
+                {compareList.length === 1 ? '1 PG Selected' : `${compareList.length} PGs Selected`}
+              </span>
+            </div>
+            <button
+              onClick={() => setShowCompareModal(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <span>Compare ({compareList.length})</span>
+            </button>
+            <button
+              onClick={() => setCompareList([])}
+              className="text-xs text-teal-300 hover:text-white underline cursor-pointer"
+            >
+              Clear
+            </button>
+          </div>
+        )}
+
         {/* Modal: Login & Registration */}
         {authModalConfig.isOpen && (
           <AuthModal
@@ -258,6 +348,16 @@ export default function App() {
               else if (user.role === 'OWNER') setActiveTab('owner-dashboard');
               else if (user.role === 'ADMIN') setActiveTab('admin');
             }}
+          />
+        )}
+
+        {/* Modal: Feedback & Grievance Submissions (Direct to Administrator) */}
+        {showFeedbackModal && (
+          <FeedbackModal
+            isOpen={showFeedbackModal}
+            onClose={() => setShowFeedbackModal(false)}
+            defaultType={feedbackDefaultType}
+            pgs={pgs}
           />
         )}
       </div>
