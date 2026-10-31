@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { X, Star, ShieldCheck, MapPin, IndianRupee, Bed, Wind, Wifi, Utensils, CheckCircle2, Phone, Mail, Clock, Send, Shield, MessageSquare, AlertCircle, Calendar, Eye, Navigation, Check } from 'lucide-react';
-import { api } from '../api';
+import { X, Star, ShieldCheck, MapPin, IndianRupee, Bed, Wind, Wifi, Utensils, CheckCircle2, Phone, Mail, Clock, Send, Shield, MessageSquare, AlertCircle, Calendar, Eye, Navigation, Check, Compass, Calculator } from 'lucide-react';
+import { api, calculateTrustScore } from '../api';
 import { useAuth } from '../context/AuthContext';
 import BookingRequestModal from './BookingRequestModal';
 import ScheduleVisitModal from './ScheduleVisitModal';
+import TravelCostCalculator from './TravelCostCalculator';
+import NearbyEssentialsMap from './NearbyEssentialsMap';
+import ReviewsSection from './ReviewsSection';
 
 export default function PgDetailsModal({ pg, onClose }) {
   const { currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'mess' | 'commute' | 'verification'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'commute' | 'nearby' | 'reviews' | 'mess' | 'verification'
   const [rooms, setRooms] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [activeImage, setActiveImage] = useState(pg.coverImage);
-
-  // Review submission state
-  const [newRating, setNewRating] = useState(5);
-  const [newComment, setNewComment] = useState('');
-  const [submittingReview, setSubmittingReview] = useState(false);
 
   const galleryImages = pg.images ? pg.images.split(',') : [pg.coverImage];
 
@@ -32,37 +30,21 @@ export default function PgDetailsModal({ pg, onClose }) {
     setReviews(reviewList);
   };
 
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault();
-    if (!currentUser || !newComment.trim()) return;
-
-    setSubmittingReview(true);
-    await api.addReview({
-      pgListingId: pg.id,
-      studentId: currentUser.id,
-      studentName: currentUser.fullName,
-      studentCollege: currentUser.college || "Student",
-      rating: newRating,
-      comment: newComment,
-      cleanlinessScore: 5,
-      foodScore: 5,
-      amenitiesScore: 5
-    });
-    setNewComment('');
-    setSubmittingReview(false);
-    loadDetails();
-  };
+  const trustScore = calculateTrustScore(pg, reviews);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md overflow-y-auto">
       <div className="bg-[#0b2b32] border border-[#1b5f6d] rounded-3xl max-w-4xl w-full text-white shadow-2xl overflow-hidden my-6 max-h-[92vh] flex flex-col">
         {/* Header bar */}
         <div className="p-4 sm:p-5 bg-[#0d383f] border-b border-teal-800 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-lg sm:text-xl font-bold text-white truncate max-w-md">{pg.name}</h3>
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold flex items-center gap-1 border border-amber-500/40">
+              <ShieldCheck className="w-3.5 h-3.5" /> Trust Score: {trustScore}/100
+            </span>
             {pg.isVerified ? (
               <span className="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-xs font-semibold flex items-center gap-1 border border-teal-500/40">
-                <ShieldCheck className="w-3.5 h-3.5" /> 100% Verified Stay
+                <CheckCircle2 className="w-3.5 h-3.5" /> 100% Verified Stay
               </span>
             ) : (
               <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold flex items-center gap-1 border border-amber-500/40">
@@ -82,17 +64,51 @@ export default function PgDetailsModal({ pg, onClose }) {
         <div className="flex items-center gap-2 px-6 pt-3 border-b border-teal-800/60 bg-[#092227] text-xs font-semibold overflow-x-auto shrink-0">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`pb-2.5 px-3 border-b-2 transition-all ${
+            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'overview'
                 ? 'border-amber-400 text-amber-300 font-bold'
                 : 'border-transparent text-teal-300/70 hover:text-teal-200'
             }`}
           >
+            <Bed className="w-3.5 h-3.5" />
             Overview & Rooms
           </button>
           <button
+            onClick={() => setActiveTab('commute')}
+            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 shrink-0 ${
+              activeTab === 'commute'
+                ? 'border-amber-400 text-amber-300 font-bold'
+                : 'border-transparent text-teal-300/70 hover:text-teal-200'
+            }`}
+          >
+            <Calculator className="w-3.5 h-3.5" />
+            College Commute & Calculator
+          </button>
+          <button
+            onClick={() => setActiveTab('nearby')}
+            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 shrink-0 ${
+              activeTab === 'nearby'
+                ? 'border-amber-400 text-amber-300 font-bold'
+                : 'border-transparent text-teal-300/70 hover:text-teal-200'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5" />
+            Nearby Essentials & Map
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 shrink-0 ${
+              activeTab === 'reviews'
+                ? 'border-amber-400 text-amber-300 font-bold'
+                : 'border-transparent text-teal-300/70 hover:text-teal-200'
+            }`}
+          >
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            Reviews & Trust Score ({reviews.length})
+          </button>
+          <button
             onClick={() => setActiveTab('mess')}
-            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1 ${
+            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'mess'
                 ? 'border-amber-400 text-amber-300 font-bold'
                 : 'border-transparent text-teal-300/70 hover:text-teal-200'
@@ -102,26 +118,15 @@ export default function PgDetailsModal({ pg, onClose }) {
             Mess & Meal Menu
           </button>
           <button
-            onClick={() => setActiveTab('commute')}
-            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1 ${
-              activeTab === 'commute'
-                ? 'border-amber-400 text-amber-300 font-bold'
-                : 'border-transparent text-teal-300/70 hover:text-teal-200'
-            }`}
-          >
-            <Navigation className="w-3.5 h-3.5" />
-            College Commute
-          </button>
-          <button
             onClick={() => setActiveTab('verification')}
-            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1 ${
+            className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'verification'
                 ? 'border-amber-400 text-amber-300 font-bold'
                 : 'border-transparent text-teal-300/70 hover:text-teal-200'
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
-            Trust & Verification Details
+            Trust Audit Dossier
           </button>
         </div>
 
@@ -342,42 +347,22 @@ export default function PgDetailsModal({ pg, onClose }) {
             </div>
           )}
 
-          {/* TAB 3: COMMUTE & DISTANCE */}
+          {/* TAB 3: COMMUTE & TRAVEL COST CALCULATOR */}
           {activeTab === 'commute' && (
-            <div className="space-y-5">
-              <div className="p-5 rounded-2xl bg-[#092227] border border-teal-800 space-y-2">
-                <h4 className="text-base font-bold text-white flex items-center gap-2">
-                  <Navigation className="w-4 h-4 text-amber-400" />
-                  College Distance & Commute Analysis
-                </h4>
-                <p className="text-xs text-teal-300/80">
-                  Nearby institutes: <strong>{pg.nearbyColleges}</strong>
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-[#09252c] border border-teal-800/80 text-center space-y-1">
-                  <span className="text-2xl font-black text-amber-400">🚶</span>
-                  <div className="text-sm font-bold text-white mt-1">Walking</div>
-                  <div className="text-xs text-teal-300">{pg.commuteTimes?.walk || "8-12 mins"}</div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#09252c] border border-teal-800/80 text-center space-y-1">
-                  <span className="text-2xl font-black text-teal-400">🚲</span>
-                  <div className="text-sm font-bold text-white mt-1">Bicycle / Yulu</div>
-                  <div className="text-xs text-teal-300">{pg.commuteTimes?.cycle || "3-5 mins"}</div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#09252c] border border-teal-800/80 text-center space-y-1">
-                  <span className="text-2xl font-black text-emerald-400">🚌</span>
-                  <div className="text-sm font-bold text-white mt-1">Bus / Metro</div>
-                  <div className="text-xs text-teal-300">{pg.commuteTimes?.bus || "7-10 mins"}</div>
-                </div>
-              </div>
-            </div>
+            <TravelCostCalculator pg={pg} />
           )}
 
-          {/* TAB 4: TRUST & VERIFICATION */}
+          {/* TAB 4: NEARBY ESSENTIALS & MAP */}
+          {activeTab === 'nearby' && (
+            <NearbyEssentialsMap pg={pg} />
+          )}
+
+          {/* TAB 5: STUDENT REVIEWS & TRUST SCORE ANALYTICS */}
+          {activeTab === 'reviews' && (
+            <ReviewsSection pg={pg} reviews={reviews} onReviewAdded={loadDetails} />
+          )}
+
+          {/* TAB 6: TRUST & VERIFICATION */}
           {activeTab === 'verification' && (
             <div className="space-y-5">
               <div className="p-5 rounded-2xl bg-[#09252c] border border-teal-800 space-y-3">
@@ -417,72 +402,6 @@ export default function PgDetailsModal({ pg, onClose }) {
               </div>
             </div>
           )}
-
-          {/* Student Reviews & Ratings */}
-          <div className="space-y-4 pt-4 border-t border-teal-800/60">
-            <div className="flex items-center justify-between">
-              <h4 className="text-base font-bold text-white flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-amber-400" />
-                Student Reviews ({reviews.length})
-              </h4>
-            </div>
-
-            {/* Existing reviews */}
-            <div className="space-y-3">
-              {reviews.map(rev => (
-                <div key={rev.id} className="p-4 rounded-xl bg-[#092227] border border-teal-800/60 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-xs text-white">{rev.studentName}</span>
-                      <span className="text-[11px] text-teal-400/60 ml-2">({rev.studentCollege || "Student"})</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-amber-400 text-xs font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400" /> {rev.rating} / 5
-                    </div>
-                  </div>
-                  <p className="text-xs text-teal-200/80">"{rev.comment}"</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Add Review Form */}
-            {currentUser && currentUser.role === 'STUDENT' && (
-              <form onSubmit={handleReviewSubmit} className="p-4 rounded-xl bg-[#0c3139] border border-teal-700/60 space-y-3">
-                <h5 className="text-xs font-bold uppercase text-teal-300">Write a Student Review</h5>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-teal-200">Your Rating:</span>
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setNewRating(star)}
-                      className="p-1"
-                    >
-                      <Star className={`w-4 h-4 ${star <= newRating ? 'fill-amber-400 text-amber-400' : 'text-slate-600'}`} />
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    required
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Share feedback on cleanliness, food quality, Wi-Fi speed..."
-                    className="flex-1 bg-[#082227] border border-teal-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"
-                  />
-                  <button
-                    type="submit"
-                    disabled={submittingReview}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-colors"
-                  >
-                    Post Review
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
         </div>
       </div>
 

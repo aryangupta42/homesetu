@@ -1,7 +1,10 @@
 import React from 'react';
-import { X, Check, Minus, Star, ShieldCheck, IndianRupee, Trash2, ArrowRight } from 'lucide-react';
+import { X, Check, Minus, Star, ShieldCheck, IndianRupee, Trash2, ArrowRight, Award, Navigation, Calculator } from 'lucide-react';
+import { calculateTrustScore, calculateGeoDistance, calculateCommuteOptions, MASTER_COLLEGES } from '../featuresData';
 
-export default function CompareModal({ compareList, removeFromCompare, onSelectPg, onClose }) {
+export default function CompareModal({ compareList, removeFromCompare, onSelectPg, onClose, selectedCollege }) {
+  const targetCollege = selectedCollege || MASTER_COLLEGES[0];
+
   if (compareList.length === 0) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -23,6 +26,84 @@ export default function CompareModal({ compareList, removeFromCompare, onSelectP
 
   const comparisonRows = [
     { label: "Starting Rent", render: (pg) => <span className="font-bold text-amber-400 text-base">₹{pg.monthlyRent?.toLocaleString('en-IN')}/mo</span> },
+    { 
+      label: "Total Est. Living Cost", 
+      render: (pg) => {
+        const dist = calculateGeoDistance(
+          pg.latitude || pg.lat || 18.5074,
+          pg.longitude || pg.lng || 73.8077,
+          targetCollege.lat,
+          targetCollege.lng
+        );
+        const options = calculateCommuteOptions(dist, { bikeMileage: 45, fuelPrice: 96.72, workingDays: 24 });
+        const rent = pg.monthlyRent || 8000;
+        const food = pg.foodIncluded ? 0 : 3500;
+        const travel = options.BIKE.monthlyCost;
+        const misc = 1500;
+        const total = rent + food + travel + misc;
+        return (
+          <div className="p-2 rounded-xl bg-[#082227] border border-amber-500/40 text-center">
+            <div className="font-extrabold text-amber-300 text-base">₹{total.toLocaleString('en-IN')}<span className="text-[10px] font-normal text-teal-300/70">/mo</span></div>
+            <div className="text-[9px] text-teal-300/80 mt-0.5">Rent+Food+Travel+Misc</div>
+          </div>
+        );
+      }
+    },
+    { 
+      label: "HomeSetu Trust Score", 
+      render: (pg) => {
+        const score = calculateTrustScore(pg);
+        return (
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
+              score >= 90 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' :
+              score >= 80 ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' :
+              'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+            }`}>
+              {score} / 100
+            </span>
+            <span className="text-[10px] text-teal-300/70">
+              {score >= 90 ? "Top Trust" : score >= 80 ? "Verified Partner" : "Standard"}
+            </span>
+          </div>
+        );
+      }
+    },
+    {
+      label: `Distance to ${targetCollege.name?.split(' ')[0] || "College"}`,
+      render: (pg) => {
+        const dist = calculateGeoDistance(
+          pg.latitude || pg.lat || 18.5074,
+          pg.longitude || pg.lng || 73.8077,
+          targetCollege.lat,
+          targetCollege.lng
+        );
+        return (
+          <div className="flex flex-col items-center">
+            <span className="font-bold text-white text-sm">{dist} km</span>
+            <span className="text-[10px] text-teal-400/80">Commute route</span>
+          </div>
+        );
+      }
+    },
+    {
+      label: "Monthly Commute (Bike)",
+      render: (pg) => {
+        const dist = calculateGeoDistance(
+          pg.latitude || pg.lat || 18.5074,
+          pg.longitude || pg.lng || 73.8077,
+          targetCollege.lat,
+          targetCollege.lng
+        );
+        const options = calculateCommuteOptions(dist, { bikeMileage: 45, fuelPrice: 96.72, workingDays: 24 });
+        return (
+          <div className="flex flex-col items-center">
+            <span className="font-bold text-amber-400 text-sm">₹{options.BIKE.monthlyCost.toLocaleString('en-IN')}/mo</span>
+            <span className="text-[10px] text-teal-300/70">~{options.BIKE.durationMins} mins / trip</span>
+          </div>
+        );
+      }
+    },
     { label: "Security Deposit", render: (pg) => <span>₹{pg.securityDeposit?.toLocaleString('en-IN') || "15,000"}</span> },
     { label: "Location", render: (pg) => <span>{pg.locality}, {pg.city}</span> },
     { label: "PG Type", render: (pg) => <span className="font-semibold">{pg.genderType}</span> },

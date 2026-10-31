@@ -29,6 +29,13 @@ public class Review {
     private Integer cleanlinessScore = 5;
     private Integer foodScore = 5;
     private Integer amenitiesScore = 5;
+    private Integer roomQualityScore = 5;
+    private Integer safetyScore = 5;
+    private Integer ownerBehaviourScore = 5;
+
+    private Integer helpfulVotes = 0;
+    private Boolean isVerifiedResident = true;
+    private Boolean isReported = false;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -76,6 +83,24 @@ public class Review {
 
     public Integer getAmenitiesScore() { return amenitiesScore; }
     public void setAmenitiesScore(Integer amenitiesScore) { this.amenitiesScore = amenitiesScore; }
+
+    public Integer getRoomQualityScore() { return roomQualityScore; }
+    public void setRoomQualityScore(Integer roomQualityScore) { this.roomQualityScore = roomQualityScore; }
+
+    public Integer getSafetyScore() { return safetyScore; }
+    public void setSafetyScore(Integer safetyScore) { this.safetyScore = safetyScore; }
+
+    public Integer getOwnerBehaviourScore() { return ownerBehaviourScore; }
+    public void setOwnerBehaviourScore(Integer ownerBehaviourScore) { this.ownerBehaviourScore = ownerBehaviourScore; }
+
+    public Integer getHelpfulVotes() { return helpfulVotes != null ? helpfulVotes : 0; }
+    public void setHelpfulVotes(Integer helpfulVotes) { this.helpfulVotes = helpfulVotes; }
+
+    public Boolean getIsVerifiedResident() { return isVerifiedResident != null ? isVerifiedResident : true; }
+    public void setIsVerifiedResident(Boolean isVerifiedResident) { this.isVerifiedResident = isVerifiedResident; }
+
+    public Boolean getIsReported() { return isReported != null ? isReported : false; }
+    public void setIsReported(Boolean isReported) { this.isReported = isReported; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

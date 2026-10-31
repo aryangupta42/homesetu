@@ -67,7 +67,11 @@ public class PgListing {
     private Integer totalRooms = 10;
     private Integer availableRooms = 3;
 
-    private Boolean isVerified = false; // "Verified Listings" feature from slides
+    private Boolean isVerified = false;
+    private Integer trustScore = 92; // 0-100 HomeSetu Trust Score
+
+    private Double latitude;
+    private Double longitude;
 
     private Double rating = 4.0;
     private Integer totalReviews = 0;
@@ -167,6 +171,24 @@ public class PgListing {
 
     public Boolean getIsVerified() { return isVerified; }
     public void setIsVerified(Boolean isVerified) { this.isVerified = isVerified; }
+
+    public Integer getTrustScore() {
+        if (trustScore != null && trustScore > 0) return trustScore;
+        // Dynamic fallback Trust Score computation (0-100)
+        int score = 65;
+        if (Boolean.TRUE.equals(isVerified)) score += 20;
+        if (rating != null) score += (int) ((rating - 3.0) * 7.5);
+        if (Boolean.TRUE.equals(hasCctv)) score += 3;
+        if (Boolean.TRUE.equals(hasBiometric)) score += 2;
+        return Math.min(100, Math.max(50, score));
+    }
+    public void setTrustScore(Integer trustScore) { this.trustScore = trustScore; }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 
     public Double getRating() { return rating; }
     public void setRating(Double rating) { this.rating = rating; }

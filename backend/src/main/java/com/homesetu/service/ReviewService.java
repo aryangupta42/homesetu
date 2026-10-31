@@ -24,6 +24,9 @@ public class ReviewService {
     @Transactional
     public Review addReview(Review review) {
         review.setCreatedAt(LocalDateTime.now());
+        if (review.getHelpfulVotes() == null) review.setHelpfulVotes(0);
+        if (review.getIsVerifiedResident() == null) review.setIsVerifiedResident(true);
+        if (review.getIsReported() == null) review.setIsReported(false);
         Review saved = reviewRepository.save(review);
 
         // Update PG's average rating and totalReviews
@@ -43,5 +46,27 @@ public class ReviewService {
 
     public List<Review> getReviewsForPg(Long pgListingId) {
         return reviewRepository.findByPgListingIdOrderByCreatedAtDesc(pgListingId);
+    }
+
+    @Transactional
+    public Review voteHelpful(Long reviewId) {
+        Optional<Review> opt = reviewRepository.findById(reviewId);
+        if (opt.isPresent()) {
+            Review r = opt.get();
+            r.setHelpfulVotes(r.getHelpfulVotes() + 1);
+            return reviewRepository.save(r);
+        }
+        return null;
+    }
+
+    @Transactional
+    public Review reportReview(Long reviewId) {
+        Optional<Review> opt = reviewRepository.findById(reviewId);
+        if (opt.isPresent()) {
+            Review r = opt.get();
+            r.setIsReported(true);
+            return reviewRepository.save(r);
+        }
+        return null;
     }
 }

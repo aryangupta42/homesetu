@@ -1,7 +1,8 @@
 import React from 'react';
-import { Filter, RotateCcw, ShieldCheck, IndianRupee, MapPin } from 'lucide-react';
+import { Filter, RotateCcw, ShieldCheck, IndianRupee, MapPin, GraduationCap, Award } from 'lucide-react';
+import { MASTER_COLLEGES } from '../featuresData';
 
-export default function PgFilterSidebar({ filters, setFilters, onReset }) {
+export default function PgFilterSidebar({ filters, setFilters, onReset, selectedCollege, onSelectCollege }) {
   const cities = ["All", "Pune", "Bengaluru", "Delhi", "Kota", "Mumbai"];
 
   const handleCheckboxChange = (field) => {
@@ -38,6 +39,33 @@ export default function PgFilterSidebar({ filters, setFilters, onReset }) {
             <option key={c} value={c}>{c === "All" ? "All Cities" : c}</option>
           ))}
         </select>
+      </div>
+
+      {/* Target College for Commute */}
+      <div>
+        <label className="block text-xs font-semibold text-teal-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+          <span>Target College / Campus</span>
+        </label>
+        <select
+          value={selectedCollege?.name || (MASTER_COLLEGES[0]?.name)}
+          onChange={(e) => {
+            const college = MASTER_COLLEGES.find(c => c.name === e.target.value);
+            if (college && onSelectCollege) {
+              onSelectCollege(college);
+            }
+          }}
+          className="w-full bg-[#082227] border border-teal-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"
+        >
+          {MASTER_COLLEGES.map(c => (
+            <option key={c.name} value={c.name}>
+              {c.name} ({c.city})
+            </option>
+          ))}
+        </select>
+        <p className="text-[10px] text-teal-400/60 mt-1">
+          Distances & commute fares will automatically calculate to this college
+        </p>
       </div>
 
       {/* Max Budget Slider */}
@@ -107,6 +135,27 @@ export default function PgFilterSidebar({ filters, setFilters, onReset }) {
             type="checkbox"
             checked={!!filters.isVerified}
             onChange={() => handleCheckboxChange('isVerified')}
+            className="w-4 h-4 accent-amber-500 rounded cursor-pointer"
+          />
+        </label>
+      </div>
+
+      {/* Trust Score 90+ Only */}
+      <div className="pt-2 border-t border-teal-800/60">
+        <label className="flex items-center justify-between cursor-pointer group">
+          <div className="flex items-center gap-2">
+            <Award className="w-4 h-4 text-amber-400" />
+            <div>
+              <span className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">
+                High Trust Score (90+)
+              </span>
+              <p className="text-[10px] text-teal-300/60">Highest trust & certified reviews</p>
+            </div>
+          </div>
+          <input
+            type="checkbox"
+            checked={!!filters.highTrustOnly}
+            onChange={() => handleCheckboxChange('highTrustOnly')}
             className="w-4 h-4 accent-amber-500 rounded cursor-pointer"
           />
         </label>

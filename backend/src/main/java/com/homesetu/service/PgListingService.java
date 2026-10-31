@@ -78,6 +78,8 @@ public class PgListingService {
                         return Double.compare(b.getMonthlyRent() != null ? b.getMonthlyRent() : 0, a.getMonthlyRent() != null ? a.getMonthlyRent() : 0);
                     } else if ("rating_desc".equalsIgnoreCase(sortBy)) {
                         return Double.compare(b.getRating() != null ? b.getRating() : 0, a.getRating() != null ? a.getRating() : 0);
+                    } else if ("trust_score_desc".equalsIgnoreCase(sortBy)) {
+                        return Integer.compare(b.getTrustScore() != null ? b.getTrustScore() : 0, a.getTrustScore() != null ? a.getTrustScore() : 0);
                     }
                     return Long.compare(b.getId(), a.getId()); // newest first
                 })
@@ -103,20 +105,13 @@ public class PgListingService {
     }
 
     public PgListing toggleVerification(Long id) {
-        Optional<PgListing> opt = pgListingRepository.findById(id);
-        if (opt.isPresent()) {
-            PgListing pg = opt.get();
-            pg.setIsVerified(!Boolean.TRUE.equals(pg.getIsVerified()));
-            return pgListingRepository.save(pg);
-        }
-        return null;
+        PgListing pg = pgListingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("PG Listing not found with id: " + id));
+        pg.setIsVerified(!Boolean.TRUE.equals(pg.getIsVerified()));
+        return pgListingRepository.save(pg);
     }
 
-    public List<RoomOption> getRoomsForPg(Long pgListingId) {
-        return roomOptionRepository.findByPgListingId(pgListingId);
-    }
-
-    public RoomOption saveRoomOption(RoomOption option) {
-        return roomOptionRepository.save(option);
+    public List<RoomOption> getRoomsForPg(Long pgId) {
+        return roomOptionRepository.findByPgListingId(pgId);
     }
 }

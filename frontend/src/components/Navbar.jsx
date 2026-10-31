@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Compass, GitCompare, HelpCircle, User, Shield, LogOut, ArrowRight, Building, CheckCircle2, MessageSquare, AlertTriangle } from 'lucide-react';
+import { Home, Compass, GitCompare, HelpCircle, User, Shield, LogOut, ArrowRight, Building, CheckCircle2, MessageSquare, AlertTriangle, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar({ activeTab, setActiveTab, compareList, openCompareModal, openAuthModal, onOpenWelcome, onOpenFeedback, onNavigateAdminTab }) {
@@ -44,6 +44,18 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
           >
             <Compass className="w-4 h-4" />
             Discover PGs
+          </button>
+
+          <button
+            onClick={() => setActiveTab('roommates')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              activeTab === 'roommates'
+                ? 'bg-amber-500 text-white shadow-md'
+                : 'text-slate-300 hover:text-white hover:bg-[#144852]'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Roommates
           </button>
 
           <button
@@ -154,13 +166,22 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
 
                   <div className="py-1">
                     {currentUser.role === 'STUDENT' && (
-                      <button
-                        onClick={() => { setActiveTab('student-dashboard'); setShowUserDropdown(false); }}
-                        className="w-full text-left px-4 py-2 hover:bg-teal-900/40 flex items-center gap-2 text-teal-100"
-                      >
-                        <User className="w-4 h-4 text-amber-400" />
-                        Student Dashboard & Bookings
-                      </button>
+                      <>
+                        <button
+                          onClick={() => { setActiveTab('student-dashboard'); setShowUserDropdown(false); }}
+                          className="w-full text-left px-4 py-2 hover:bg-teal-900/40 flex items-center gap-2 text-teal-100"
+                        >
+                          <User className="w-4 h-4 text-amber-400" />
+                          Student Dashboard & Bookings
+                        </button>
+                        <button
+                          onClick={() => { setActiveTab('roommates'); setShowUserDropdown(false); }}
+                          className="w-full text-left px-4 py-2 hover:bg-teal-900/40 flex items-center gap-2 text-teal-100"
+                        >
+                          <Users className="w-4 h-4 text-emerald-400" />
+                          Roommate Finder & Chat
+                        </button>
+                      </>
                     )}
 
                     {currentUser.role === 'OWNER' && (

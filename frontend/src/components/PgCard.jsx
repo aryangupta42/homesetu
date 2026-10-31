@@ -1,7 +1,33 @@
 import React from 'react';
-import { Star, ShieldCheck, MapPin, IndianRupee, Users, Wifi, Wind, Utensils, Bed, GitCompare, Eye, Check } from 'lucide-react';
+import { 
+  Star, ShieldCheck, MapPin, IndianRupee, Users, Wifi, 
+  Wind, Utensils, Bed, GitCompare, Eye, Check, Clock, 
+  Navigation, Bike, Shield
+} from 'lucide-react';
+import { calculateTrustScore, MASTER_COLLEGES, calculateGeoDistance } from '../api';
 
-export default function PgCard({ pg, onSelect, isCompared, toggleCompare }) {
+export default function PgCard({ pg, onSelect, isCompared, toggleCompare, selectedCollege }) {
+  const trustScore = pg.trustScore || calculateTrustScore(pg);
+  
+  // Calculate college distance if college is selected
+  let collegeDistanceInfo = null;
+  if (selectedCollege && selectedCollege !== 'All') {
+    const col = MASTER_COLLEGES.find(c => c.name === selectedCollege);
+    if (col) {
+      const dist = calculateGeoDistance(
+        pg.latitude || pg.lat || 18.5074,
+        pg.longitude || pg.lng || 73.8077,
+        col.lat,
+        col.lng
+      );
+      collegeDistanceInfo = {
+        name: col.name.split('(')[0].trim(),
+        distanceKm: dist,
+        bikeMin: Math.max(4, Math.round(dist * 2.2 + 3))
+      };
+    }
+  }
+
   return (
     <div className="bg-[#0c3139] border border-[#17525e] hover:border-amber-400/60 rounded-2xl overflow-hidden shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-950/40 flex flex-col group">
       {/* Image with badges */}
@@ -15,13 +41,20 @@ export default function PgCard({ pg, onSelect, isCompared, toggleCompare }) {
 
         {/* Top Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 items-center">
+          {/* Trust Score Badge */}
+          <span className="px-2.5 py-1 rounded-full bg-[#081d21]/90 backdrop-blur-md text-amber-300 text-[11px] font-black border border-amber-400/50 flex items-center gap-1 shadow-sm">
+            <Shield className="w-3.5 h-3.5 text-amber-400" />
+            <span>{trustScore} Trust Score</span>
+          </span>
+
           {pg.isVerified && (
             <span className="px-2.5 py-1 rounded-full bg-teal-600/90 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1 shadow-sm">
               <ShieldCheck className="w-3.5 h-3.5" />
               Verified Stay
             </span>
           )}
-          <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-sm ${
+          
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md shadow-sm ${
             pg.genderType === 'GIRLS' ? 'bg-pink-900/80 text-pink-200 border border-pink-700/50' :
             pg.genderType === 'BOYS' ? 'bg-blue-900/80 text-blue-200 border border-blue-700/50' :
             'bg-purple-900/80 text-purple-200 border border-purple-700/50'
@@ -31,7 +64,7 @@ export default function PgCard({ pg, onSelect, isCompared, toggleCompare }) {
         </div>
 
         {/* Rating badge */}
-        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-amber-400 text-xs font-bold flex items-center gap-1">
+        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-amber-400 text-xs font-bold flex items-center gap-1">
           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
           <span>{pg.rating?.toFixed(1) || "4.3"}</span>
           <span className="text-slate-400 text-[10px]">({pg.totalReviews || 12})</span>
@@ -61,11 +94,22 @@ export default function PgCard({ pg, onSelect, isCompared, toggleCompare }) {
             <span className="font-semibold text-teal-200">{pg.locality}, {pg.city}</span>
           </div>
 
-          {pg.nearbyColleges && (
+          {/* Dynamic College Commute Strip if selected, else nearby colleges */}
+          {collegeDistanceInfo ? (
+            <div className="mt-2.5 p-2 rounded-xl bg-[#081d21] border border-amber-400/40 text-[11px] text-amber-300 flex items-center justify-between">
+              <span className="font-semibold truncate max-w-[150px]">
+                🎓 {collegeDistanceInfo.name}
+              </span>
+              <span className="font-black text-white shrink-0 flex items-center gap-1">
+                <Bike className="w-3.5 h-3.5 text-cyan-400" />
+                {collegeDistanceInfo.distanceKm} km ({collegeDistanceInfo.bikeMin}m)
+              </span>
+            </div>
+          ) : pg.nearbyColleges ? (
             <p className="text-[11px] text-teal-300/60 mt-2 line-clamp-1">
               🎓 {pg.nearbyColleges}
             </p>
-          )}
+          ) : null}
 
           {/* Key Amenities preview */}
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -107,7 +151,7 @@ export default function PgCard({ pg, onSelect, isCompared, toggleCompare }) {
             <button
               onClick={(e) => { e.stopPropagation(); toggleCompare(pg); }}
               title="Add to Comparison matrix"
-              className={`p-2.5 rounded-xl border text-xs font-semibold transition-colors flex items-center justify-center ${
+              className={`p-2.5 rounded-xl border text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer ${
                 isCompared
                   ? 'bg-amber-500 text-slate-950 border-amber-500'
                   : 'bg-[#092227] text-teal-300 border-teal-700/60 hover:border-amber-400 hover:text-white'
@@ -119,7 +163,7 @@ export default function PgCard({ pg, onSelect, isCompared, toggleCompare }) {
             {/* View Details */}
             <button
               onClick={() => onSelect(pg)}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-orange-500/20 flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-orange-500/20 flex items-center gap-1.5 cursor-pointer"
             >
               <span>View & Book</span>
               <Eye className="w-3.5 h-3.5" />

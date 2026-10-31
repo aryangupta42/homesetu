@@ -1,6 +1,30 @@
 // API service for HomeSetu frontend
 // Connects to Spring Boot backend at /api with graceful local fallback for standalone & evaluation use
 
+import {
+  MASTER_COLLEGES,
+  calculateGeoDistance,
+  calculateCommuteOptions,
+  calculateTrustScore,
+  getNearbyEssentialsForPg,
+  INITIAL_ROOMMATE_PROFILES,
+  INITIAL_ROOMMATE_CONNECTIONS,
+  INITIAL_ROOMMATE_WANTED,
+  INITIAL_ROOMMATE_MESSAGES
+} from './featuresData';
+
+export {
+  MASTER_COLLEGES,
+  calculateGeoDistance,
+  calculateCommuteOptions,
+  calculateTrustScore,
+  getNearbyEssentialsForPg,
+  INITIAL_ROOMMATE_PROFILES,
+  INITIAL_ROOMMATE_CONNECTIONS,
+  INITIAL_ROOMMATE_WANTED,
+  INITIAL_ROOMMATE_MESSAGES
+};
+
 const API_BASE = '/api';
 
 // Initial fallback mock data with 12 rich student PGs across Pune, Bengaluru, Delhi, Kota
@@ -1949,5 +1973,267 @@ export const api = {
       }
     }
     return item;
+  },
+
+  // Review Actions (Helpful vote & Report)
+  voteHelpfulReview: async (reviewId) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/reviews/${reviewId}/vote-helpful`, { method: 'POST' }, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+    for (const pgId in mockReviews) {
+      const rev = mockReviews[pgId].find(r => r.id === Number(reviewId));
+      if (rev) {
+        rev.helpfulVotes = (rev.helpfulVotes || 0) + 1;
+        return rev;
+      }
+    }
+    return null;
+  },
+
+  reportReview: async (reviewId) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/reviews/${reviewId}/report`, { method: 'POST' }, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+    for (const pgId in mockReviews) {
+      const rev = mockReviews[pgId].find(r => r.id === Number(reviewId));
+      if (rev) {
+        rev.isReported = true;
+        return rev;
+      }
+    }
+    return null;
+  },
+
+  // Roommate Finder Services
+  getRoommateProfiles: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.city && filters.city !== 'All') params.append('city', filters.city);
+      if (filters.studentId) params.append('studentId', filters.studentId);
+      const res = await safeApiFetch(`${API_BASE}/roommates/recommendations?${params.toString()}`, {}, 300);
+      if (res && res.ok) {
+        const data = await res.json();
+        return data.map(item => ({ ...item.profile, compatibilityScore: item.compatibilityScore }));
+      }
+    } catch (e) {}
+
+    const saved = localStorage.getItem('homesetu_roommate_profiles');
+    let list = saved ? JSON.parse(saved) : [...INITIAL_ROOMMATE_PROFILES];
+    if (filters.city && filters.city !== 'All') {
+      list = list.filter(p => p.city.toLowerCase() === filters.city.toLowerCase());
+    }
+    return list;
+  },
+
+  getMyRoommateProfile: async (studentId) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/profile/${studentId}`, {}, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const saved = localStorage.getItem('homesetu_my_roommate_profile');
+    if (saved) return JSON.parse(saved);
+
+    return {
+      studentId: studentId || 6,
+      fullName: "Aarav Sharma",
+      email: "student1@homesetu.demo",
+      phone: "+91 98111 20001",
+      college: "ABES Engineering College, Ghaziabad",
+      course: "B.Tech Computer Science",
+      academicYear: "3rd Year",
+      city: "Ghaziabad",
+      preferredLocality: "Crossings Republik",
+      budgetMin: 6000,
+      budgetMax: 9000,
+      targetMoveInDate: "2026-11-15",
+      roomSharingPreference: "DOUBLE_SHARING",
+      gender: "MALE",
+      sleepSchedule: "EARLY_BIRD",
+      cleanlinessLevel: "HIGH",
+      studyHabit: "SILENT_ROOM",
+      foodPreference: "VEG_ONLY",
+      smokingHabit: "STRICTLY_NO",
+      guestPolicy: "STUDY_BUDDIES_ONLY",
+      bio: "CS student preparing for competitive programming and tech internships. Early riser, very neat habits, and looking for a studious roommate.",
+      avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
+      isVerifiedStudent: true
+    };
+  },
+
+  saveRoommateProfile: async (profileData) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData)
+      }, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    localStorage.setItem('homesetu_my_roommate_profile', JSON.stringify(profileData));
+    const saved = localStorage.getItem('homesetu_roommate_profiles');
+    let list = saved ? JSON.parse(saved) : [...INITIAL_ROOMMATE_PROFILES];
+    const idx = list.findIndex(p => p.studentId === profileData.studentId);
+    if (idx !== -1) {
+      list[idx] = { ...list[idx], ...profileData };
+    } else {
+      list.unshift({ id: Date.now(), ...profileData });
+    }
+    localStorage.setItem('homesetu_roommate_profiles', JSON.stringify(list));
+    return profileData;
+  },
+
+  sendRoommateRequest: async (requesterStudentId, recipientStudentId, message = '') => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/connect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requesterStudentId, recipientStudentId, message })
+      }, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const saved = localStorage.getItem('homesetu_roommate_connections');
+    let list = saved ? JSON.parse(saved) : [...INITIAL_ROOMMATE_CONNECTIONS];
+    const allProfiles = JSON.parse(localStorage.getItem('homesetu_roommate_profiles') || JSON.stringify(INITIAL_ROOMMATE_PROFILES));
+    const target = allProfiles.find(p => p.studentId === recipientStudentId);
+
+    const newConn = {
+      id: Date.now(),
+      requesterStudentId,
+      recipientStudentId,
+      requesterName: "Aarav Sharma",
+      recipientName: target ? target.fullName : "Student Match",
+      requesterCollege: "ABES Engineering College",
+      recipientCollege: target ? target.college : "Campus",
+      compatibilityScore: 92,
+      status: "PENDING",
+      initialMessage: message,
+      updatedAt: new Date().toISOString()
+    };
+    list.unshift(newConn);
+    localStorage.setItem('homesetu_roommate_connections', JSON.stringify(list));
+    return newConn;
+  },
+
+  updateRoommateConnectionStatus: async (connectionId, status) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/connect/${connectionId}/status?status=${status}`, {
+        method: 'PUT'
+      }, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const saved = localStorage.getItem('homesetu_roommate_connections');
+    let list = saved ? JSON.parse(saved) : [...INITIAL_ROOMMATE_CONNECTIONS];
+    const conn = list.find(c => c.id === Number(connectionId));
+    if (conn) {
+      conn.status = status;
+      conn.updatedAt = new Date().toISOString();
+      localStorage.setItem('homesetu_roommate_connections', JSON.stringify(list));
+    }
+    return conn;
+  },
+
+  getRoommateConnections: async (studentId) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/connections/${studentId}`, {}, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const saved = localStorage.getItem('homesetu_roommate_connections');
+    return saved ? JSON.parse(saved) : [...INITIAL_ROOMMATE_CONNECTIONS];
+  },
+
+  getRoommateMessages: async (connectionId) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/messages/${connectionId}`, {}, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const key = `homesetu_chat_${connectionId}`;
+    const saved = localStorage.getItem(key);
+    if (saved) return JSON.parse(saved);
+    return INITIAL_ROOMMATE_MESSAGES[connectionId] || [];
+  },
+
+  sendRoommateMessage: async (connectionId, senderStudentId, senderName, content) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId, senderStudentId, senderName, content })
+      }, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const key = `homesetu_chat_${connectionId}`;
+    const saved = localStorage.getItem(key);
+    let msgs = saved ? JSON.parse(saved) : (INITIAL_ROOMMATE_MESSAGES[connectionId] || []);
+    const newMsg = {
+      id: Date.now(),
+      connectionId,
+      senderStudentId,
+      senderName,
+      content,
+      sentAt: new Date().toISOString()
+    };
+    msgs.push(newMsg);
+    localStorage.setItem(key, JSON.stringify(msgs));
+    return newMsg;
+  },
+
+  findPgTogether: async (budget1 = 7500, budget2 = 7500, city = 'All') => {
+    try {
+      const params = new URLSearchParams({ budget1, budget2, city });
+      const res = await safeApiFetch(`${API_BASE}/roommates/find-together?${params.toString()}`, {}, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const combined = Number(budget1) + Number(budget2);
+    mockPgs = getFreshPgs();
+    return mockPgs.filter(p => {
+      if (city !== 'All' && p.city.toLowerCase() !== city.toLowerCase()) return false;
+      return (p.monthlyRent * 2) <= (combined * 1.15);
+    });
+  },
+
+  getRoommatesWanted: async (city = 'All') => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/wanted?city=${city}`, {}, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const saved = localStorage.getItem('homesetu_roommate_wanted');
+    let list = saved ? JSON.parse(saved) : [...INITIAL_ROOMMATE_WANTED];
+    if (city !== 'All') {
+      list = list.filter(w => w.city.toLowerCase() === city.toLowerCase());
+    }
+    return list;
+  },
+
+  postRoommateWanted: async (data) => {
+    try {
+      const res = await safeApiFetch(`${API_BASE}/roommates/wanted`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }, 300);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+
+    const saved = localStorage.getItem('homesetu_roommate_wanted');
+    let list = saved ? JSON.parse(saved) : [...INITIAL_ROOMMATE_WANTED];
+    const newListing = {
+      id: Date.now(),
+      ...data,
+      createdAt: new Date().toISOString()
+    };
+    list.unshift(newListing);
+    localStorage.setItem('homesetu_roommate_wanted', JSON.stringify(list));
+    return newListing;
   }
 };

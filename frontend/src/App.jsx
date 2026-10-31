@@ -14,8 +14,10 @@ import AdminPortal from './components/AdminPortal';
 import AuthModal from './components/AuthModal';
 import WelcomeScreen from './components/WelcomeScreen';
 import FeedbackModal from './components/FeedbackModal';
+import RoommateFinder from './components/RoommateFinder';
 import Footer from './components/Footer';
 import { Search, SlidersHorizontal, ArrowUpDown, Frown } from 'lucide-react';
+import { MASTER_COLLEGES, calculateTrustScore, calculateGeoDistance } from './featuresData';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
@@ -36,6 +38,7 @@ export default function App() {
     const user = localStorage.getItem('homesetu_user');
     return !user;
   });
+  const [selectedCollege, setSelectedCollege] = useState(MASTER_COLLEGES[0]);
   const [pgs, setPgs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -58,6 +61,7 @@ export default function App() {
     hasWifi: false,
     foodIncluded: false,
     isVerified: false,
+    highTrustOnly: false,
     sortBy: 'newest'
   });
 
@@ -75,11 +79,38 @@ export default function App() {
 
   useEffect(() => {
     fetchPgs();
-  }, [filters]);
+  }, [filters, selectedCollege]);
 
   const fetchPgs = async () => {
     setLoading(true);
-    const data = await api.getPgs(filters);
+    let data = await api.getPgs(filters);
+
+    // Client-side high trust filter
+    if (filters.highTrustOnly) {
+      data = data.filter(pg => calculateTrustScore(pg) >= 90);
+    }
+
+    // Client-side advanced sorting
+    if (filters.sortBy === 'trust_score_desc') {
+      data = [...data].sort((a, b) => calculateTrustScore(b) - calculateTrustScore(a));
+    } else if (filters.sortBy === 'distance_asc' && selectedCollege) {
+      data = [...data].sort((a, b) => {
+        const distA = calculateGeoDistance(
+          a.latitude || a.lat || 18.5,
+          a.longitude || a.lng || 73.8,
+          selectedCollege.lat,
+          selectedCollege.lng
+        );
+        const distB = calculateGeoDistance(
+          b.latitude || b.lat || 18.5,
+          b.longitude || b.lng || 73.8,
+          selectedCollege.lat,
+          selectedCollege.lng
+        );
+        return distA - distB;
+      });
+    }
+
     setPgs(data);
     setLoading(false);
   };
@@ -95,6 +126,7 @@ export default function App() {
       hasWifi: false,
       foodIncluded: false,
       isVerified: false,
+      highTrustOnly: false,
       sortBy: 'newest'
     });
   };
@@ -186,6 +218,8 @@ export default function App() {
                       filters={filters}
                       setFilters={setFilters}
                       onReset={resetFilters}
+                      selectedCollege={selectedCollege}
+                      onSelectCollege={setSelectedCollege}
                     />
                   </div>
 
@@ -201,7 +235,7 @@ export default function App() {
                           </span>
                         </h2>
                         <p className="text-xs text-teal-300/70 mt-0.5">
-                          Showing stays in {filters.city === 'All' ? 'all cities' : filters.city}
+                          Showing stays in {filters.city === 'All' ? 'all cities' : filters.city} • Commute relative to <strong className="text-amber-300">{selectedCollege?.name?.split(' ')[0] || "Campus"}</strong>
                         </p>
                       </div>
 
@@ -214,6 +248,8 @@ export default function App() {
                           className="bg-[#082227] border border-teal-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400 cursor-pointer"
                         >
                           <option value="newest">Recommended</option>
+                          <option value="trust_score_desc">Highest Trust Score (90+)</option>
+                          <option value="distance_asc">Nearest to College Campus</option>
                           <option value="price_asc">Rent: Low to High</option>
                           <option value="price_desc">Rent: High to Low</option>
                           <option value="rating_desc">Highest Rated (★)</option>
@@ -247,6 +283,7 @@ export default function App() {
                           <PgCard
                             key={pg.id}
                             pg={pg}
+                            selectedCollege={selectedCollege}
                             onSelect={setSelectedPg}
                             isCompared={compareList.some(item => item.id === pg.id)}
                             toggleCompare={toggleCompare}
@@ -257,6 +294,15 @@ export default function App() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'roommates' && (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
+              <RoommateFinder
+                onSelectPg={(pg) => setSelectedPg(pg)}
+                selectedCollege={selectedCollege}
+              />
             </div>
           )}
 
@@ -308,6 +354,7 @@ export default function App() {
             removeFromCompare={removeFromCompare}
             onSelectPg={(pg) => setSelectedPg(pg)}
             onClose={() => setShowCompareModal(false)}
+            selectedCollege={selectedCollege}
           />
         )}
 
