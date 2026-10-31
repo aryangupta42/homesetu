@@ -364,6 +364,8 @@ export default function StudentDashboard({ onExploreClick, openAuthModal, onOpen
             currentUser={currentUser}
             allPgs={allPgs}
             onSelectPg={(pg) => setSelectedPgDetails(pg)}
+            onOpenFeedback={onOpenFeedback}
+            onExploreClick={onExploreClick}
           />
         </div>
       )}

@@ -120,16 +120,21 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
         studentId: selectedRole === 'STUDENT' ? studentId : '',
         propertyName: selectedRole === 'OWNER' ? propertyName : '',
         address: selectedRole === 'OWNER' ? pgAddress : '',
-        city: 'Ghaziabad'
+        verificationDoc: selectedRole === 'OWNER' ? (uploadedDocName || 'electricity_bill_deed.pdf') : '',
+        city: selectedRole === 'OWNER' && pgAddress && pgAddress.includes(',') ? pgAddress.split(',').pop().trim() : 'Ghaziabad'
       };
 
       const res = await register(payload);
       if (res.success) {
-        setSuccessMsg(`Account created successfully as ${selectedRole}! Redirecting to dashboard...`);
+        if (selectedRole === 'OWNER') {
+          setSuccessMsg(`Account & "${propertyName || 'PG Property'}" registered! Awaiting platform administrator verification...`);
+        } else {
+          setSuccessMsg(`Account created successfully as ${selectedRole}! Redirecting to dashboard...`);
+        }
         setTimeout(() => {
           if (onAuthSuccess) onAuthSuccess(res.user);
           onClose();
-        }, 600);
+        }, 700);
       } else {
         setError(res.message || 'Registration failed. Please try again.');
       }
@@ -518,7 +523,7 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={
                           selectedRole === 'STUDENT' ? 'student1@homesetu.demo' :
-                          selectedRole === 'OWNER' ? 'owner1@homesetu.demo' : 'admin@homesetu.demo'
+                          selectedRole === 'OWNER' ? 'owner1@homesetu.demo' : 'arshm2772@gmail.com'
                         }
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#545ced] focus:ring-2 focus:ring-[#545ced]/20 text-sm font-medium transition-all"
                       />
@@ -567,8 +572,8 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                             setEmail('owner1@homesetu.demo');
                             setPassword('Owner@123');
                           } else if (selectedRole === 'ADMIN') {
-                            setEmail('admin@homesetu.demo');
-                            setPassword('Admin@123');
+                            setEmail('arshm2772@gmail.com');
+                            setPassword('123456');
                           }
                         }}
                         className="text-[#545ced] font-bold hover:underline"

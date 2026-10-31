@@ -241,7 +241,7 @@ export default function WelcomeScreen({ onGetStarted, onSelectRole, onExploreAsG
                           Platform Administrator
                         </h4>
                         <p className="text-[11px] text-teal-300/80">
-                          Audit KYC documents & verify accommodations
+                          Exclusive Access • arshm2772@gmail.com
                         </p>
                       </div>
                     </div>

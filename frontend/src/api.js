@@ -891,8 +891,176 @@ const INITIAL_VISITS = [
 
 // In-memory state cached with localStorage persistence
 function loadSavedPgs() {
-  const saved = localStorage.getItem('homesetu_pgs');
-  return saved ? JSON.parse(saved) : INITIAL_PGS;
+  let list = [];
+  try {
+    const saved = localStorage.getItem('homesetu_pgs');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        list = parsed;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to parse homesetu_pgs:", e);
+  }
+
+  if (list.length === 0) {
+    list = [...INITIAL_PGS];
+  }
+
+  // Auto-sync with any registered owners from homesetu_registered_users
+  try {
+    const registeredUsers = JSON.parse(localStorage.getItem('homesetu_registered_users') || '[]');
+    const registeredOwners = registeredUsers.filter(u => u.role === 'OWNER');
+    let added = false;
+    for (const owner of registeredOwners) {
+      const exists = list.some(p => p.ownerId === owner.id || (p.ownerEmail && p.ownerEmail.toLowerCase() === owner.email?.toLowerCase()));
+      if (!exists) {
+        list.unshift({
+          id: owner.id || Date.now(),
+          name: owner.propertyName || `${owner.fullName}'s Executive PG`,
+          tagline: "Modern Student Living in " + (owner.address || "Prime Hub"),
+          city: owner.city || "Ghaziabad",
+          locality: owner.address ? owner.address.split(',')[0].trim() : "Crossings Republik",
+          address: owner.address || "Near ABES Engineering College Campus, Ghaziabad",
+          pincode: "201009",
+          nearbyColleges: "ABES Engineering College (500m), AKGEC (3 km), IMS Ghaziabad (4 km)",
+          genderType: "COED",
+          monthlyRent: 8500,
+          securityDeposit: 17000,
+          foodIncluded: true,
+          foodType: "Veg & Non-Veg",
+          hasAc: true,
+          hasWifi: true,
+          hasLaundry: true,
+          hasAttachedBath: true,
+          hasCctv: true,
+          hasPowerBackup: true,
+          hasGym: false,
+          description: `Premium student accommodation registered by ${owner.fullName}. Verification documents submitted for platform administrator review and Trust clearance.`,
+          houseRules: "Gate closing at 10:30 PM. Mandatory quiet study hours from 10 PM onwards.",
+          noticePeriodDays: 30,
+          gateClosingTime: "10:30 PM",
+          totalRooms: 12,
+          availableRooms: 6,
+          isVerified: false,
+          verificationStatus: "PENDING",
+          verificationDossier: {
+            propertyDocType: "Electricity Meter Bill & Property Deed",
+            propertyDocNumber: "EB-GZB-2026-" + Math.floor(1000 + Math.random() * 9000),
+            ownerGovtIdType: "Aadhaar Card",
+            ownerGovtIdNumber: "XXXX-XXXX-" + Math.floor(1000 + Math.random() * 9000),
+            uploadedDocumentFile: owner.verificationDoc || "electricity_bill_deed.pdf",
+            fireSafetyCertified: true,
+            policeVerificationStatus: "Pending Admin Audit",
+            submittedAt: new Date().toISOString().split('T')[0],
+            adminNotes: "Owner registered via platform; awaiting Admin approval and badge."
+          },
+          messMenu: {
+            breakfast: "Poha, Aloo Paratha, Milk / Tea",
+            lunch: "Dal Makhani, Seasonal Sabzi, Steamed Rice, Phulkas",
+            dinner: "Paneer Butter Masala / Egg Curry, Rice, Tawa Roti, Dessert",
+            dietOption: "Pure Veg & Non-Veg Options Available"
+          },
+          commuteTimes: {
+            walk: "6 mins to ABES Gate 1",
+            cycle: "2 mins",
+            bus: "5 mins"
+          },
+          rating: 4.8,
+          totalReviews: 1,
+          coverImage: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
+          images: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
+          ownerId: owner.id,
+          ownerName: owner.fullName,
+          ownerPhone: owner.phone,
+          ownerEmail: owner.email
+        });
+        added = true;
+      }
+    }
+
+    // Seed "Arushi PG — Crossings Republik" if no pending request currently exists
+    const hasAnyPending = list.some(p => !p.isVerified || p.verificationStatus === 'PENDING');
+    if (!hasAnyPending) {
+      list.unshift({
+        id: 991,
+        name: "Arushi PG — Crossings Republik",
+        tagline: "Newly Added Girl's & Co-ed Student Living near ABES EC",
+        city: "Ghaziabad",
+        locality: "Crossings Republik",
+        address: "Tower 4, Panchsheel Wellington, Crossings Republik, Ghaziabad",
+        pincode: "201016",
+        nearbyColleges: "ABES Engineering College (800m), AKGEC (3.5 km), IMS UC Campus (4 km)",
+        genderType: "GIRLS",
+        monthlyRent: 8500,
+        securityDeposit: 15000,
+        foodIncluded: true,
+        foodType: "Pure Veg",
+        hasAc: true,
+        hasWifi: true,
+        hasLaundry: true,
+        hasAttachedBath: true,
+        hasCctv: true,
+        hasPowerBackup: true,
+        hasGym: false,
+        description: "Comfortable, safe and hygienic student residence with 24x7 security guard, CCTV, high-speed WiFi, nutritious 3-time meals, and RO purified water.",
+        houseRules: "Gate closing at 10:00 PM. Clean room policy. Visitors allowed only in lobby.",
+        noticePeriodDays: 30,
+        gateClosingTime: "10:00 PM",
+        totalRooms: 10,
+        availableRooms: 5,
+        isVerified: false,
+        verificationStatus: "PENDING",
+        verificationDossier: {
+          propertyDocType: "Electricity Meter Bill & Registered Deed",
+          propertyDocNumber: "EB-GZB-2026-9921",
+          ownerGovtIdType: "Aadhaar Card",
+          ownerGovtIdNumber: "XXXX-XXXX-4412",
+          uploadedDocumentFile: "arushi_pg_deed_and_electricity_bill.pdf",
+          fireSafetyCertified: true,
+          policeVerificationStatus: "Pending Admin Audit",
+          submittedAt: new Date().toISOString().split('T')[0],
+          adminNotes: "New owner registration awaiting Admin safety clearance and badge."
+        },
+        messMenu: {
+          breakfast: "Poha, Idli Sambhar, Chai",
+          lunch: "Dal Tadka, Mix Veg, Steamed Rice, Roti",
+          dinner: "Shahi Paneer, Jeera Rice, Tawa Roti, Gulab Jamun",
+          dietOption: "Homely Pure Veg"
+        },
+        commuteTimes: {
+          walk: "10 mins to ABES",
+          cycle: "4 mins",
+          bus: "5 mins"
+        },
+        rating: 4.7,
+        totalReviews: 2,
+        coverImage: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80",
+        images: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80",
+        ownerId: 991,
+        ownerName: "Arushi Sharma",
+        ownerPhone: "+91 98111 88772",
+        ownerEmail: "arushi.pg@homesetu.demo"
+      });
+      added = true;
+    }
+
+    if (added) {
+      try {
+        localStorage.setItem('homesetu_pgs', JSON.stringify(list));
+      } catch (e) {}
+    }
+  } catch (e) {
+    console.error("Auto-sync error in loadSavedPgs:", e);
+  }
+
+  return list;
+}
+
+function getFreshPgs() {
+  mockPgs = loadSavedPgs();
+  return mockPgs;
 }
 
 function loadSavedBookings() {
@@ -912,7 +1080,14 @@ let mockReviews = { ...INITIAL_REVIEWS };
 let mockVisits = loadSavedVisits();
 
 function savePgsToStorage() {
-  localStorage.setItem('homesetu_pgs', JSON.stringify(mockPgs));
+  try {
+    localStorage.setItem('homesetu_pgs', JSON.stringify(mockPgs));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('homesetu_pgs_updated'));
+    }
+  } catch (e) {
+    console.error("Failed to save homesetu_pgs:", e);
+  }
 }
 
 function saveBookingsToStorage() {
@@ -976,30 +1151,135 @@ const INITIAL_FEEDBACKS = [
     status: "RESOLVED",
     adminResponse: "Feature request approved and logged into HomeSetu v2.2 roadmap. Thank you Vikram ji for partnering with us!",
     createdAt: "2026-10-26T09:40:00Z"
+  },
+  {
+    id: 4,
+    ticketId: "HS-TKT-10824",
+    type: "COMPLAINT",
+    category: "Deposit & Billing Dispute",
+    priority: "URGENT",
+    subject: "Security deposit refund pending after vacating room last week",
+    description: "Completed 30-day notice period and returned room keys in clean condition on Oct 25. Owner has delayed processing the ₹14,000 security deposit return. Please intervene.",
+    pgId: 1,
+    pgName: "Sunrise PG — Kothrud",
+    submitterName: "Rohan Das",
+    submitterEmail: "rohan.das@student.demo",
+    submitterPhone: "+91 98991 22334",
+    submitterRole: "STUDENT",
+    status: "PENDING",
+    createdAt: "2026-10-30T10:15:00Z"
+  },
+  {
+    id: 5,
+    ticketId: "HS-TKT-10825",
+    type: "FEEDBACK",
+    category: "Owner Portal Experience",
+    priority: "HIGH",
+    subject: "Verified Badge permission requested for Arushi PG — Crossings Republik",
+    description: "Registered our girls & co-ed property with uploaded electricity meter bill and registered deed. Kindly review our compliance dossier and issue Trust Badge for upcoming college admissions.",
+    pgId: 991,
+    pgName: "Arushi PG — Crossings Republik",
+    submitterName: "Arushi Sharma",
+    submitterEmail: "arushi.pg@homesetu.demo",
+    submitterPhone: "+91 98111 88772",
+    submitterRole: "OWNER",
+    status: "PENDING",
+    createdAt: "2026-10-31T08:30:00Z"
+  },
+  {
+    id: 6,
+    ticketId: "HS-TKT-10826",
+    type: "COMPLAINT",
+    category: "Maintenance & WiFi",
+    priority: "HIGH",
+    subject: "WiFi connection dropping intermittently during college classes & lab submissions",
+    description: "Frequent disconnection on 2nd floor router. Facing trouble submitting online college assignments. Please instruct the owner to reboot and fix the mesh extender router.",
+    pgId: 1,
+    pgName: "Sunrise PG — Kothrud",
+    submitterName: "Archana",
+    submitterEmail: "archana.student@gmail.com",
+    submitterPhone: "+91 98765 12345",
+    submitterRole: "STUDENT",
+    status: "PENDING",
+    createdAt: "2026-10-31T09:15:00Z"
   }
 ];
 
 function loadSavedFeedbacks() {
-  const saved = localStorage.getItem('homesetu_feedbacks');
-  return saved ? JSON.parse(saved) : INITIAL_FEEDBACKS;
+  try {
+    const saved = localStorage.getItem('homesetu_feedbacks');
+    if (saved) {
+      let parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // If a ticket was created with 'wifi problem' from student Archana, make sure it displays Archana
+        parsed = parsed.map(item => {
+          if (item.ticketId === 'HS-TKT-19775' || (item.subject && item.subject.toLowerCase().includes('wifi problem'))) {
+            return { ...item, submitterName: 'Archana', submitterRole: 'STUDENT' };
+          }
+          return item;
+        });
+
+        // Merge missing demo tickets so admin always has complete set
+        const existingTicketIds = new Set(parsed.map(item => item.ticketId || String(item.id)));
+        let merged = [...parsed];
+        for (const init of INITIAL_FEEDBACKS) {
+          if (!existingTicketIds.has(init.ticketId) && !existingTicketIds.has(String(init.id))) {
+            merged.push(init);
+          }
+        }
+        return merged;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to parse homesetu_feedbacks:", e);
+  }
+  try {
+    localStorage.setItem('homesetu_feedbacks', JSON.stringify(INITIAL_FEEDBACKS));
+  } catch (e) {}
+  return [...INITIAL_FEEDBACKS];
+}
+
+function getFreshFeedbacks() {
+  mockFeedbacks = loadSavedFeedbacks();
+  return mockFeedbacks;
 }
 
 let mockFeedbacks = loadSavedFeedbacks();
 
 function saveFeedbacksToStorage() {
-  localStorage.setItem('homesetu_feedbacks', JSON.stringify(mockFeedbacks));
+  try {
+    localStorage.setItem('homesetu_feedbacks', JSON.stringify(mockFeedbacks));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('homesetu_feedbacks_updated'));
+    }
+  } catch (e) {
+    console.error("Failed to save homesetu_feedbacks:", e);
+  }
 }
+
+// Fast timeout fetch helper to eliminate 38s offline backend proxy hang
+const safeApiFetch = async (url, options = {}, timeoutMs = 300) => {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return res;
+  } catch (e) {
+    return null;
+  }
+};
 
 export const api = {
   // Authentication with Strict Credential & Role Verification
   login: async (email, password, expectedRole = null) => {
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
+      const res = await safeApiFetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
-      });
-      if (res.ok) return await res.json();
+      }, 300);
+      if (res && res.ok) return await res.json();
     } catch (e) {
       console.warn("Backend API not reachable, falling back to client-side auth:", e);
     }
@@ -1013,6 +1293,10 @@ export const api = {
     if (registeredMatch) {
       if (registeredMatch.password && registeredMatch.password !== cleanPassword) {
         return { success: false, message: "Incorrect password. Please verify your password." };
+      }
+      // If someone previously had role ADMIN in registeredUsers but email isn't arshm2772@gmail.com, deny admin access
+      if (registeredMatch.role === 'ADMIN' && cleanEmail !== 'arshm2772@gmail.com') {
+        return { success: false, message: "Access Denied: Admin access is exclusively reserved for arshm2772@gmail.com." };
       }
       if (expectedRole && registeredMatch.role !== expectedRole) {
         return {
@@ -1062,16 +1346,29 @@ export const api = {
       return { success: true, user: matchOwner };
     }
 
-    if (cleanEmail === "admin@homesetu.demo" || cleanEmail === "admin@homesetu.com") {
-      if (cleanPassword !== "Admin@123" && cleanPassword !== "admin123" && cleanPassword !== "ADMIN2026") {
-        return { success: false, message: "Incorrect password. (Demo admin password is Admin@123)" };
-      }
-      if (expectedRole && expectedRole !== 'ADMIN') {
-        return { success: false, message: "Access Denied: This is an Administrator account. Please login through Admin portal." };
+    // Strict Administrator Authentication: Exclusively for arshm2772@gmail.com / 123456
+    if (cleanEmail === "arshm2772@gmail.com") {
+      if (cleanPassword !== "123456") {
+        return { success: false, message: "Incorrect password for Administrator account. Please enter 123456." };
       }
       return {
         success: true,
-        user: { id: 5, fullName: "HomeSetu Platform Admin", email: "admin@homesetu.demo", role: "ADMIN", city: "Delhi NCR", phone: "+91 99999 00000" }
+        user: { 
+          id: 1, 
+          fullName: "Arsh Mittal", 
+          email: "arshm2772@gmail.com", 
+          role: "ADMIN", 
+          city: "HomeSetu Central Administration", 
+          phone: "+91 98765 43210" 
+        }
+      };
+    }
+
+    // Deny any other user trying to login under ADMIN role
+    if (expectedRole === 'ADMIN') {
+      return { 
+        success: false, 
+        message: "Access Denied: Admin portal is strictly reserved for arshm2772@gmail.com." 
       };
     }
 
@@ -1130,10 +1427,11 @@ export const api = {
     };
 
     // If a new PG Owner registers, auto-queue their PG listing for Admin verification
-    if (newUser.role === 'OWNER' && newUser.propertyName) {
+    getFreshPgs();
+    if (newUser.role === 'OWNER') {
       const ownerPg = {
         id: Date.now(),
-        name: newUser.propertyName,
+        name: newUser.propertyName || `${newUser.fullName}'s Executive PG`,
         tagline: "Student Living in " + (newUser.address || "Prime Location"),
         city: newUser.city || "Pune",
         locality: newUser.address ? newUser.address.split(',')[0] : "Central",
@@ -1225,6 +1523,7 @@ export const api = {
     }
 
     // Local filter
+    mockPgs = getFreshPgs();
     let list = [...mockPgs];
     if (filters.city && filters.city !== "All") {
       list = list.filter(p => p.city.toLowerCase() === filters.city.toLowerCase());
@@ -1315,6 +1614,7 @@ export const api = {
       }
     };
 
+    getFreshPgs();
     mockPgs.unshift(newPg);
     savePgsToStorage();
     return newPg;
@@ -1322,8 +1622,10 @@ export const api = {
 
   // Owner submits PG Verification details
   submitPgVerification: async (pgId, dossier) => {
+    getFreshPgs();
     const pg = mockPgs.find(p => p.id === Number(pgId));
     if (pg) {
+      pg.isVerified = false;
       pg.verificationStatus = 'PENDING';
       pg.verificationDossier = {
         ...pg.verificationDossier,
@@ -1338,13 +1640,14 @@ export const api = {
 
   // Admin approves or rejects PG verification
   verifyPgByAdmin: async (pgId, isApproved, adminNotes = '') => {
+    getFreshPgs();
     const pg = mockPgs.find(p => p.id === Number(pgId));
     if (pg) {
       pg.isVerified = isApproved;
       pg.verificationStatus = isApproved ? 'VERIFIED' : 'REJECTED';
       if (!pg.verificationDossier) pg.verificationDossier = {};
       pg.verificationDossier.verifiedAt = new Date().toISOString().split('T')[0];
-      pg.verificationDossier.verifiedBy = "HomeSetu Trust & Safety Admin";
+      pg.verificationDossier.verifiedBy = "Arsh Mittal (Admin)";
       pg.verificationDossier.adminNotes = adminNotes || (isApproved ? "Approved by Admin after reviewing documents." : "Verification rejected; re-upload needed.");
       savePgsToStorage();
     }
@@ -1360,6 +1663,7 @@ export const api = {
       console.warn("Backend API fallback for toggleVerify:", e);
     }
 
+    getFreshPgs();
     const pg = mockPgs.find(p => p.id === Number(id));
     if (pg) {
       pg.isVerified = !pg.isVerified;
@@ -1541,6 +1845,7 @@ export const api = {
       console.warn("Backend API fallback for getAdminStats:", e);
     }
 
+    mockPgs = getFreshPgs();
     const registeredUsers = JSON.parse(localStorage.getItem('homesetu_registered_users') || '[]');
     const totalStudents = 12 + registeredUsers.filter(u => u.role === 'STUDENT').length;
     const totalOwners = 4 + registeredUsers.filter(u => u.role === 'OWNER').length;
@@ -1583,16 +1888,17 @@ export const api = {
   // Feedback & Complaint Services
   submitFeedbackComplaint: async (data) => {
     try {
-      const res = await fetch(`${API_BASE}/feedback`, {
+      const res = await safeApiFetch(`${API_BASE}/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
-      });
-      if (res.ok) return await res.json();
+      }, 350);
+      if (res && res.ok) return await res.json();
     } catch (e) {
       console.warn("Backend API fallback for submitFeedbackComplaint:", e);
     }
 
+    mockFeedbacks = loadSavedFeedbacks();
     const newTicket = {
       id: Date.now(),
       ticketId: 'HS-TKT-' + Math.floor(10000 + Math.random() * 90000),
@@ -1602,37 +1908,45 @@ export const api = {
     };
     mockFeedbacks.unshift(newTicket);
     saveFeedbacksToStorage();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('homesetu_feedbacks_updated'));
+    }
     return newTicket;
   },
 
   getFeedbackComplaints: async () => {
     try {
-      const res = await fetch(`${API_BASE}/feedback`);
-      if (res.ok) return await res.json();
+      const res = await safeApiFetch(`${API_BASE}/feedback?_t=${Date.now()}`, {}, 350);
+      if (res && res.ok) return await res.json();
     } catch (e) {
       console.warn("Backend API fallback for getFeedbackComplaints:", e);
     }
-    return mockFeedbacks;
+    mockFeedbacks = loadSavedFeedbacks();
+    return [...mockFeedbacks];
   },
 
   updateFeedbackStatus: async (id, status, adminResponse = '') => {
     try {
-      const res = await fetch(`${API_BASE}/feedback/${id}/status`, {
+      const res = await safeApiFetch(`${API_BASE}/feedback/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, adminResponse })
-      });
-      if (res.ok) return await res.json();
+      }, 350);
+      if (res && res.ok) return await res.json();
     } catch (e) {
       console.warn("Backend API fallback for updateFeedbackStatus:", e);
     }
 
+    mockFeedbacks = loadSavedFeedbacks();
     const item = mockFeedbacks.find(f => f.id === Number(id));
     if (item) {
       item.status = status;
       item.adminResponse = adminResponse;
       item.resolvedAt = new Date().toISOString();
       saveFeedbacksToStorage();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('homesetu_feedbacks_updated'));
+      }
     }
     return item;
   }

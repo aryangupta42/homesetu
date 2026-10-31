@@ -39,27 +39,15 @@ public class DataInitializer implements CommandLineRunner {
         // 1. ADMIN ACCOUNTS
         // ---------------------------------------------------------
         User admin1 = seedUser(
-                "HomeSetu Platform Admin",
-                "admin@homesetu.demo",
-                "Admin@123",
+                "Arsh Mittal (Platform Admin)",
+                "arshm2772@gmail.com",
+                "123456",
                 "ADMIN",
-                "+91 99999 00000",
+                "+91 98765 43210",
                 "HomeSetu Headquarters",
                 "ADM-2026-001",
                 "HomeSetu Platform",
                 "Delhi NCR"
-        );
-
-        seedUser(
-                "HomeSetu Admin (Backup)",
-                "admin@homesetu.com",
-                "admin123",
-                "ADMIN",
-                "+91 99999 88888",
-                "HomeSetu Admin Center",
-                "ADM-2026-002",
-                "HomeSetu Platform",
-                "Pune"
         );
 
         // ---------------------------------------------------------

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle2, Send, HelpCircle, Building } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
@@ -11,11 +11,33 @@ export default function FeedbackModal({ isOpen, onClose, defaultType = 'COMPLAIN
   const [selectedPgId, setSelectedPgId] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
-  const [fullName, setFullName] = useState(currentUser?.fullName || '');
-  const [email, setEmail] = useState(currentUser?.email || '');
-  const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [submitterRole, setSubmitterRole] = useState('STUDENT'); // 'STUDENT' | 'OWNER'
   const [submitting, setSubmitting] = useState(false);
   const [submittedTicket, setSubmittedTicket] = useState(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setType(defaultType);
+      setCategory(defaultType === 'COMPLAINT' ? 'Maintenance & WiFi' : 'Platform Usability');
+      let active = currentUser;
+      if (!active && typeof window !== 'undefined') {
+        try {
+          active = JSON.parse(localStorage.getItem('homesetu_user') || 'null');
+        } catch (e) {}
+      }
+      if (active) {
+        setFullName(active.fullName || '');
+        setEmail(active.email || '');
+        setPhone(active.phone || '');
+        setSubmitterRole(active.role || (defaultType === 'COMPLAINT' ? 'STUDENT' : 'OWNER'));
+      } else {
+        setSubmitterRole(defaultType === 'COMPLAINT' ? 'STUDENT' : 'OWNER');
+      }
+    }
+  }, [isOpen, currentUser, defaultType]);
 
   if (!isOpen) return null;
 
@@ -44,21 +66,32 @@ export default function FeedbackModal({ isOpen, onClose, defaultType = 'COMPLAIN
     setSubmitting(true);
 
     const relatedPg = pgs.find(p => p.id === Number(selectedPgId));
+    let active = currentUser;
+    if (!active && typeof window !== 'undefined') {
+      try {
+        active = JSON.parse(localStorage.getItem('homesetu_user') || 'null');
+      } catch (e) {}
+    }
+
+    const effectiveName = fullName.trim() || active?.fullName || (submitterRole === 'OWNER' ? 'PG Property Owner' : 'College Student');
+    const effectiveEmail = email.trim() || active?.email || 'user@homesetu.com';
+    const effectivePhone = phone.trim() || active?.phone || '+91 98765 00000';
+    const effectiveRole = active?.role ? active.role : (submitterRole || 'STUDENT');
 
     try {
       const ticket = await api.submitFeedbackComplaint({
         type,
         category,
         priority,
-        subject,
-        description,
+        subject: subject.trim(),
+        description: description.trim(),
         pgId: relatedPg ? relatedPg.id : null,
         pgName: relatedPg ? relatedPg.name : 'General Platform',
-        submitterId: currentUser?.id || null,
-        submitterName: fullName || currentUser?.fullName || 'Anonymous User',
-        submitterEmail: email || currentUser?.email || 'user@homesetu.com',
-        submitterPhone: phone || currentUser?.phone || '+91 98765 00000',
-        submitterRole: currentUser?.role || 'STUDENT'
+        submitterId: active?.id || null,
+        submitterName: effectiveName,
+        submitterEmail: effectiveEmail,
+        submitterPhone: effectivePhone,
+        submitterRole: effectiveRole
       });
 
       setSubmittedTicket(ticket);
@@ -272,14 +305,34 @@ export default function FeedbackModal({ isOpen, onClose, defaultType = 'COMPLAIN
 
             {/* Submitter Info */}
             <div className="p-4 rounded-2xl bg-[#082227] border border-teal-800/80 space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <span className="text-teal-300 font-semibold">Contact & Verification Info</span>
                 {currentUser ? (
-                  <span className="text-[10px] text-teal-400 bg-teal-900/60 px-2 py-0.5 rounded-full border border-teal-700/60">
-                    Logged in as {currentUser.fullName} ({currentUser.role})
+                  <span className="text-[10px] text-teal-300 bg-teal-900/80 px-2.5 py-0.5 rounded-full border border-teal-700/60 font-medium">
+                    Logged in as <strong>{currentUser.fullName}</strong> ({currentUser.role === 'OWNER' ? 'PG Owner' : 'College Student'})
                   </span>
                 ) : (
-                  <span className="text-[10px] text-slate-400">Submitting as Guest / Student</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-slate-300 mr-1 font-medium">I am a:</span>
+                    <button
+                      type="button"
+                      onClick={() => setSubmitterRole('STUDENT')}
+                      className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all ${
+                        submitterRole === 'STUDENT' ? 'bg-amber-500 text-slate-950 shadow' : 'bg-teal-900/60 text-teal-300 border border-teal-800'
+                      }`}
+                    >
+                      🎓 Student
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSubmitterRole('OWNER')}
+                      className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all ${
+                        submitterRole === 'OWNER' ? 'bg-orange-500 text-slate-950 shadow' : 'bg-teal-900/60 text-teal-300 border border-teal-800'
+                      }`}
+                    >
+                      🏢 PG Owner
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -291,8 +344,8 @@ export default function FeedbackModal({ isOpen, onClose, defaultType = 'COMPLAIN
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Aarav Sharma"
-                    className="w-full bg-[#0c3139] border border-teal-700/60 rounded-lg px-2.5 py-1.5 text-white"
+                    placeholder="e.g. Archana / Rahul"
+                    className="w-full bg-[#0c3139] border border-teal-700/60 rounded-lg px-2.5 py-1.5 text-white placeholder-teal-600 focus:outline-none focus:border-amber-400"
                   />
                 </div>
                 <div>
@@ -302,8 +355,8 @@ export default function FeedbackModal({ isOpen, onClose, defaultType = 'COMPLAIN
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. aarav@gmail.com"
-                    className="w-full bg-[#0c3139] border border-teal-700/60 rounded-lg px-2.5 py-1.5 text-white"
+                    placeholder="e.g. archana@gmail.com"
+                    className="w-full bg-[#0c3139] border border-teal-700/60 rounded-lg px-2.5 py-1.5 text-white placeholder-teal-600 focus:outline-none focus:border-amber-400"
                   />
                 </div>
                 <div>
@@ -313,8 +366,8 @@ export default function FeedbackModal({ isOpen, onClose, defaultType = 'COMPLAIN
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. +91 98765 43210"
-                    className="w-full bg-[#0c3139] border border-teal-700/60 rounded-lg px-2.5 py-1.5 text-white"
+                    placeholder="e.g. +91 98765 12345"
+                    className="w-full bg-[#0c3139] border border-teal-700/60 rounded-lg px-2.5 py-1.5 text-white placeholder-teal-600 focus:outline-none focus:border-amber-400"
                   />
                 </div>
               </div>

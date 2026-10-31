@@ -114,13 +114,13 @@ export const DEMO_USERS = {
     }
   ],
   admin: {
-    id: 5,
-    fullName: "HomeSetu Platform Admin",
-    email: "admin@homesetu.demo",
-    password: "Admin@123",
+    id: 1,
+    fullName: "Arsh Mittal",
+    email: "arshm2772@gmail.com",
+    password: "123456",
     role: "ADMIN",
-    phone: "+91 99999 00000",
-    city: "Delhi NCR"
+    phone: "+91 98765 43210",
+    city: "HomeSetu Central Administration"
   }
 };
 
@@ -152,7 +152,8 @@ export function AuthProvider({ children }) {
     const res = await api.register(userData);
     if (res.success && res.user) {
       setCurrentUser(res.user);
-      return { success: true };
+      localStorage.setItem('homesetu_user', JSON.stringify(res.user));
+      return { success: true, user: res.user };
     }
     return { success: false, message: res.message || "Registration failed" };
   };

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
-import { Building, Plus, CheckCircle2, XCircle, Clock, Users, Bed, MapPin, IndianRupee, ShieldCheck, Check, X, FileText, AlertTriangle, Shield, UploadCloud, Sparkles, MessageSquare } from 'lucide-react';
+import { Building, Plus, CheckCircle2, XCircle, Clock, Users, Bed, MapPin, IndianRupee, ShieldCheck, Check, X, FileText, AlertTriangle, Shield, UploadCloud, Sparkles, MessageSquare, Bot, ArrowRight, TrendingUp } from 'lucide-react';
 import PgFeaturesModal from './PgFeaturesModal';
+import AiOwnerMarketAgent from './AiOwnerMarketAgent';
 
 export default function OwnerDashboard({ openAuthModal, onExploreClick, onOpenFeedback }) {
   const { currentUser, logout } = useAuth();
   const [requests, setRequests] = useState([]);
   const [listings, setListings] = useState([]);
+  const [activeSubTab, setActiveSubTab] = useState('overview'); // 'overview' | 'ai-market-agent'
   const [showAddModal, setShowAddModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showAddRoomModal, setShowAddRoomModal] = useState(false);
@@ -68,6 +70,17 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick, onOpenFe
 
   useEffect(() => {
     loadData();
+
+    const handleStorageChange = () => {
+      loadData();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('homesetu_pgs_updated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('homesetu_pgs_updated', handleStorageChange);
+    };
   }, [currentUser]);
 
   const loadData = async () => {
@@ -259,6 +272,14 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick, onOpenFe
           </button>
 
           <button
+            onClick={() => setActiveSubTab(activeSubTab === 'ai-market-agent' ? 'overview' : 'ai-market-agent')}
+            className="px-4 py-3 rounded-xl bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2 shrink-0 cursor-pointer hover:scale-105 active:scale-95"
+          >
+            <Bot className="w-4 h-4 text-slate-950" />
+            <span>{activeSubTab === 'ai-market-agent' ? 'View My Properties' : 'Ask AI Agent'}</span>
+          </button>
+
+          <button
             onClick={() => setShowAddModal(true)}
             className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-orange-500/20 flex items-center gap-2 shrink-0"
           >
@@ -267,6 +288,74 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick, onOpenFe
           </button>
         </div>
       </div>
+
+      {/* Sub-navigation Switcher: Properties & Bookings VS AI Market Agent */}
+      <div className="flex items-center gap-2 border-b border-teal-800/80 pb-3">
+        <button
+          onClick={() => setActiveSubTab('overview')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            activeSubTab === 'overview'
+              ? 'bg-amber-400 text-slate-950 shadow-md font-extrabold'
+              : 'bg-[#09252c] text-teal-200 hover:bg-[#0e3b46] border border-teal-700/60'
+          }`}
+        >
+          <Building className="w-4 h-4" />
+          <span>🏢 My Properties & Bookings</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('ai-market-agent')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            activeSubTab === 'ai-market-agent'
+              ? 'bg-amber-400 text-slate-950 shadow-md font-extrabold'
+              : 'bg-[#09252c] text-teal-200 hover:bg-[#0e3b46] border border-teal-700/60'
+          }`}
+        >
+          <Bot className="w-4 h-4" />
+          <span>🤖 Ask AI Agent (Market Demand & Pricing)</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        </button>
+      </div>
+
+      {activeSubTab === 'ai-market-agent' ? (
+        <AiOwnerMarketAgent
+          currentUser={currentUser}
+          myListings={listings}
+          onAddNewListing={() => {
+            setActiveSubTab('overview');
+            setShowAddModal(true);
+          }}
+          onOpenDossier={() => setShowVerificationModal(true)}
+        />
+      ) : (
+        <>
+          {/* AI Market Advisor Quick Pulse Banner */}
+          <div className="bg-gradient-to-r from-[#0d343b] via-[#10434c] to-[#0a2e34] border border-teal-500/50 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 font-black flex items-center justify-center shadow-lg shrink-0">
+                <Bot className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-extrabold text-white text-base">HomeSetu AI Market & Pricing Advisor</h4>
+                  <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full font-bold border border-amber-500/30">
+                    Live Demand Pulse
+                  </span>
+                </div>
+                <p className="text-xs text-teal-200/90 mt-0.5">
+                  Students are actively booking <span className="font-bold text-white">Double Sharing (54%)</span> at the <span className="font-bold text-amber-300">₹7,500 – ₹9,200</span> sweet spot. Top requested: <span className="text-teal-300 font-semibold">300 Mbps Wi-Fi, 3-Time Food & Power Backup</span>.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveSubTab('ai-market-agent')}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs transition-all shadow-md flex items-center gap-2 shrink-0 cursor-pointer hover:scale-105 active:scale-95"
+            >
+              <Sparkles className="w-4 h-4 text-slate-950" />
+              <span>Open Ask AI Agent</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
       {/* Verification Status Card */}
       <div className={`p-5 rounded-2xl border transition-all ${
@@ -433,11 +522,11 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick, onOpenFe
                   <h4 className="font-bold text-white text-base">{pg.name}</h4>
                   {pg.isVerified ? (
                     <span className="text-[10px] bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border border-teal-500/40">
-                      <ShieldCheck className="w-3 h-3" /> Verified
+                      <ShieldCheck className="w-3 h-3" /> 100% Verified
                     </span>
                   ) : (
-                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border border-amber-500/40">
-                      <Clock className="w-3 h-3" /> Unverified
+                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full font-extrabold flex items-center gap-1 border border-amber-500/40 animate-pulse">
+                      <Clock className="w-3 h-3" /> Awaiting Admin Permission
                     </span>
                   )}
                 </div>
@@ -489,12 +578,22 @@ export default function OwnerDashboard({ openAuthModal, onExploreClick, onOpenFe
                   >
                     Verify Docs
                   </button>
+
+                  <button
+                    onClick={() => setActiveSubTab('ai-market-agent')}
+                    className="px-3 py-1.5 rounded-lg bg-teal-950 hover:bg-teal-900 text-amber-300 text-xs font-semibold border border-teal-700/80 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Bot className="w-3.5 h-3.5 text-amber-400" />
+                    <span>AI Market Insights</span>
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+        </>
+      )}
 
       {/* MODAL 1: Action confirmation with student */}
       {actionModalBooking && (

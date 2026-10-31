@@ -15,11 +15,11 @@ export default function Footer() {
   return (
     <footer className="bg-[#06181b] border-t border-[#144852] text-white pt-16 pb-12 px-4 sm:px-6 lg:px-8 mt-20">
       <div className="max-w-7xl mx-auto space-y-12">
-        {/* Future Scope Section (Slide 9) */}
+        {/* Future Scope Section */}
         <div className="bg-[#09252c] border border-teal-800/80 rounded-3xl p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-amber-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Future Scope & Roadmap (Slide 9)</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Future Scope</span>
           </div>
           <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-2">
             From Finding a Room to Finding a Place to Call Home

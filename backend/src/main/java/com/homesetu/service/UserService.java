@@ -19,6 +19,10 @@ public class UserService {
     private UserRepository userRepository;
 
     public AuthResponse register(RegisterRequest req) {
+        if ("ADMIN".equalsIgnoreCase(req.getRole()) && !"arshm2772@gmail.com".equalsIgnoreCase(req.getEmail())) {
+            return new AuthResponse(false, "Registration of Admin accounts is restricted to arshm2772@gmail.com!", null, null);
+        }
+
         if (userRepository.existsByEmail(req.getEmail())) {
             return new AuthResponse(false, "Email is already registered!", null, null);
         }
