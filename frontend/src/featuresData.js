@@ -559,3 +559,4 @@ export const INITIAL_ROOMMATE_WANTED = [
     preferredHabits: "Early bird, non-smoker, engineering/management student"
   }
 ];
+

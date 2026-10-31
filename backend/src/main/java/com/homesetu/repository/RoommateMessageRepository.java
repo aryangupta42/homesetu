@@ -10,3 +10,4 @@ import java.util.List;
 public interface RoommateMessageRepository extends JpaRepository<RoommateMessage, Long> {
     List<RoommateMessage> findByConnectionIdOrderBySentAtAsc(Long connectionId);
 }
+

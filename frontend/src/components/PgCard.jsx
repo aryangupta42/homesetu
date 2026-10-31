@@ -1,14 +1,14 @@
 import React from 'react';
-import { 
-  Star, ShieldCheck, MapPin, IndianRupee, Users, Wifi, 
-  Wind, Utensils, Bed, GitCompare, Eye, Check, Clock, 
+import {
+  Star, ShieldCheck, MapPin, IndianRupee, Users, Wifi,
+  Wind, Utensils, Bed, GitCompare, Eye, Check, Clock,
   Navigation, Bike, Shield
 } from 'lucide-react';
 import { calculateTrustScore, MASTER_COLLEGES, calculateGeoDistance } from '../api';
 
 export default function PgCard({ pg, onSelect, isCompared, toggleCompare, selectedCollege }) {
   const trustScore = pg.trustScore || calculateTrustScore(pg);
-  
+
   // Calculate college distance if college is selected
   let collegeDistanceInfo = null;
   if (selectedCollege && selectedCollege !== 'All') {
@@ -53,12 +53,11 @@ export default function PgCard({ pg, onSelect, isCompared, toggleCompare, select
               Verified Stay
             </span>
           )}
-          
-          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md shadow-sm ${
-            pg.genderType === 'GIRLS' ? 'bg-pink-900/80 text-pink-200 border border-pink-700/50' :
-            pg.genderType === 'BOYS' ? 'bg-blue-900/80 text-blue-200 border border-blue-700/50' :
-            'bg-purple-900/80 text-purple-200 border border-purple-700/50'
-          }`}>
+
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md shadow-sm ${pg.genderType === 'GIRLS' ? 'bg-pink-900/80 text-pink-200 border border-pink-700/50' :
+              pg.genderType === 'BOYS' ? 'bg-blue-900/80 text-blue-200 border border-blue-700/50' :
+                'bg-purple-900/80 text-purple-200 border border-purple-700/50'
+            }`}>
             {pg.genderType} PG
           </span>
         </div>
@@ -81,8 +80,8 @@ export default function PgCard({ pg, onSelect, isCompared, toggleCompare, select
       <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
         <div>
           <div className="flex items-start justify-between gap-2">
-            <h3 
-              onClick={() => onSelect(pg)} 
+            <h3
+              onClick={() => onSelect(pg)}
               className="text-lg font-bold text-white group-hover:text-amber-400 transition-colors cursor-pointer"
             >
               {pg.name}
@@ -151,11 +150,10 @@ export default function PgCard({ pg, onSelect, isCompared, toggleCompare, select
             <button
               onClick={(e) => { e.stopPropagation(); toggleCompare(pg); }}
               title="Add to Comparison matrix"
-              className={`p-2.5 rounded-xl border text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer ${
-                isCompared
+              className={`p-2.5 rounded-xl border text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer ${isCompared
                   ? 'bg-amber-500 text-slate-950 border-amber-500'
                   : 'bg-[#092227] text-teal-300 border-teal-700/60 hover:border-amber-400 hover:text-white'
-              }`}
+                }`}
             >
               <GitCompare className="w-4 h-4" />
             </button>

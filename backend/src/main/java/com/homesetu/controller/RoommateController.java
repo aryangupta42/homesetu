@@ -91,3 +91,4 @@ public class RoommateController {
         return ResponseEntity.ok(roommateService.postWantedListing(listing));
     }
 }
+

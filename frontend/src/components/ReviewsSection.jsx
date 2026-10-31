@@ -456,3 +456,4 @@ export default function ReviewsSection({ pg, reviews = [], onReviewAdded }) {
     </div>
   );
 }
+

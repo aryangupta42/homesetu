@@ -57,3 +57,4 @@ public class RoommateMessage {
     public LocalDateTime getSentAt() { return sentAt; }
     public void setSentAt(LocalDateTime sentAt) { this.sentAt = sentAt; }
 }
+

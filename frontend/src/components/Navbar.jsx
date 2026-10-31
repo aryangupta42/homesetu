@@ -46,17 +46,20 @@ export default function Navbar({ activeTab, setActiveTab, compareList, openCompa
             Discover PGs
           </button>
 
-          <button
-            onClick={() => setActiveTab('roommates')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
-              activeTab === 'roommates'
-                ? 'bg-amber-500 text-white shadow-md'
-                : 'text-slate-300 hover:text-white hover:bg-[#144852]'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            Roommates
-          </button>
+          {/* Roommates Tab: Exclusively for College Students and public discovery; completely hidden on Owner Dashboard, Admin Portal, and for Owner/Admin roles */}
+          {activeTab !== 'owner-dashboard' && activeTab !== 'admin' && currentUser?.role !== 'OWNER' && currentUser?.role !== 'ADMIN' && (
+            <button
+              onClick={() => setActiveTab('roommates')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                activeTab === 'roommates'
+                  ? 'bg-amber-500 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white hover:bg-[#144852]'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              Roommates
+            </button>
+          )}
 
           <button
             onClick={() => setActiveTab('how-it-works')}

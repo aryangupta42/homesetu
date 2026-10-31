@@ -16,3 +16,4 @@ public interface RoommateConnectionRepository extends JpaRepository<RoommateConn
     @Query("SELECT c FROM RoommateConnection c WHERE (c.requesterStudentId = :s1 AND c.recipientStudentId = :s2) OR (c.requesterStudentId = :s2 AND c.recipientStudentId = :s1)")
     Optional<RoommateConnection> findBetweenStudents(Long s1, Long s2);
 }
+

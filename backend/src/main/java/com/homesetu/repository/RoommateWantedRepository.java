@@ -11,3 +11,4 @@ public interface RoommateWantedRepository extends JpaRepository<RoommateWantedLi
     List<RoommateWantedListing> findByIsActiveTrueOrderByCreatedAtDesc();
     List<RoommateWantedListing> findByCityIgnoreCaseAndIsActiveTrue(String city);
 }
+

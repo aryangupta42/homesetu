@@ -13,3 +13,4 @@ public interface RoommateProfileRepository extends JpaRepository<RoommateProfile
     List<RoommateProfile> findByIsActiveTrue();
     List<RoommateProfile> findByCityIgnoreCaseAndIsActiveTrue(String city);
 }
+

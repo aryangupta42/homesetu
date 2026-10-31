@@ -233,3 +233,4 @@ public class RoommateService {
         return wantedRepository.save(listing);
     }
 }
+

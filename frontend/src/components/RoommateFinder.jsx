@@ -163,6 +163,33 @@ export default function RoommateFinder({ onSelectPg }) {
     return true;
   });
 
+  // Access Boundary: Roommate Matching is strictly for College Students
+  if (currentUser && (currentUser.role === 'OWNER' || currentUser.role === 'ADMIN')) {
+    return (
+      <div className="py-20 px-4 max-w-xl mx-auto text-center space-y-6 text-white animate-in fade-in duration-200">
+        <div className="w-20 h-20 rounded-3xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center text-4xl mx-auto shadow-xl">
+          🔒
+        </div>
+        <div>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white">Access Restricted</h3>
+          <p className="text-xs uppercase font-bold tracking-widest text-amber-400 mt-1">Student Role Only</p>
+        </div>
+        <p className="text-sm text-teal-200/80 leading-relaxed max-w-md mx-auto">
+          The Smart Roommate Finder & Lifestyle Matching ecosystem is strictly reserved for College Students.
+          You are currently logged in with the <strong className="text-white">{currentUser.role}</strong> role ({currentUser.fullName}).
+        </p>
+        <button
+          onClick={() => {
+            window.location.reload();
+          }}
+          className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors shadow-lg shadow-amber-500/20"
+        >
+          Return to {currentUser.role === 'OWNER' ? 'Owner Portal' : 'Admin Portal'}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 text-white">
       {/* Hero Header */}
@@ -1082,3 +1109,4 @@ export default function RoommateFinder({ onSelectPg }) {
     </div>
   );
 }
+
