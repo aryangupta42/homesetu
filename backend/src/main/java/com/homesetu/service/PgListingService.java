@@ -114,4 +114,8 @@ public class PgListingService {
     public List<RoomOption> getRoomsForPg(Long pgId) {
         return roomOptionRepository.findByPgListingId(pgId);
     }
+
+    public RoomOption saveRoomOption(RoomOption option) {
+        return roomOptionRepository.save(option);
+    }
 }
