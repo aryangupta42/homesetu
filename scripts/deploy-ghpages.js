@@ -12,6 +12,7 @@ function deploy() {
 
   // Ensure 404.html exists for GitHub Pages SPA routing
   fs.copyFileSync(path.join(distDir, 'index.html'), path.join(distDir, '404.html'));
+  fs.writeFileSync(path.join(distDir, '.nojekyll'), '');
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'homesetu-ghpages-'));
   console.log('Copying dist files to temp directory:', tempDir);
@@ -27,10 +28,10 @@ function deploy() {
   try {
     run('git init');
     run('git checkout -b gh-pages');
-    run('git config user.name "Arsh Mittal"');
-    run('git config user.email "arshmittal@bytebros.team"');
+    run('git config user.name "Aryan"');
+    run('git config user.email "aryanguptaji686@gmail.com"');
     run('git add -A');
-    run('git commit -m "deploy: update gh-pages with strict role-based authentication and portal access"');
+    run('git commit -m "deploy: update GitHub Pages with latest frontend build"');
     run('git remote add origin https://github.com/aryangupta42/homesetu.git');
     run('git push origin gh-pages --force');
     console.log('✅ Successfully deployed frontend/dist to gh-pages branch!');
