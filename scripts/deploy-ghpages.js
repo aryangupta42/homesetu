@@ -10,8 +10,9 @@ function deploy() {
     process.exit(1);
   }
 
-  // Ensure 404.html exists for GitHub Pages SPA routing
+  // Ensure 404.html and 200.html exist for GitHub Pages SPA routing
   fs.copyFileSync(path.join(distDir, 'index.html'), path.join(distDir, '404.html'));
+  fs.copyFileSync(path.join(distDir, 'index.html'), path.join(distDir, '200.html'));
   fs.writeFileSync(path.join(distDir, '.nojekyll'), '');
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'homesetu-ghpages-'));
