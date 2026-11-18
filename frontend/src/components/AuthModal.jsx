@@ -341,9 +341,20 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
 
               {/* Feedback messages */}
               {error && (
-                <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 animate-in fade-in">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{error}</span>
+                <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex flex-col gap-2 animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span className="font-semibold">{error}</span>
+                  </div>
+                  {error.includes('register first') && (
+                    <button
+                      type="button"
+                      onClick={() => { setIsLogin(false); setError(''); }}
+                      className="text-xs font-bold text-[#545ced] hover:text-[#434bd8] flex items-center gap-1 self-start cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-[#545ced]/30 hover:border-[#545ced] shadow-2xs transition-all"
+                    >
+                      <span>👉 New User? Register as {getRoleName()} here</span>
+                    </button>
+                  )}
                 </div>
               )}
               {successMsg && (
@@ -756,6 +767,35 @@ export default function AuthModal({ initialMode = 'login', initialRole = null, o
                   </>
                 )}
               </form>
+
+              {/* Bottom Switcher: Register / Login prompt */}
+              {selectedRole !== 'ADMIN' && (
+                <div className="text-center pt-3 border-t border-slate-100">
+                  {isLogin ? (
+                    <p className="text-xs text-slate-500">
+                      New {getRoleName()}?{' '}
+                      <button
+                        type="button"
+                        onClick={() => { setIsLogin(false); setError(''); setSuccessMsg(''); }}
+                        className="text-[#545ced] font-bold hover:underline cursor-pointer ml-1"
+                      >
+                        Register your account first →
+                      </button>
+                    </p>
+                  ) : (
+                    <p className="text-xs text-slate-500">
+                      Already registered as {getRoleName()}?{' '}
+                      <button
+                        type="button"
+                        onClick={() => { setIsLogin(true); setError(''); setSuccessMsg(''); }}
+                        className="text-[#545ced] font-bold hover:underline cursor-pointer ml-1"
+                      >
+                        Login with your credentials →
+                      </button>
+                    </p>
+                  )}
+                </div>
+              )}
 
             </div>
           </div>

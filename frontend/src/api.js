@@ -1652,90 +1652,12 @@ export const api = {
       };
     }
 
-    // 3. Auto-Provisioning / Seamless Login for new custom users (e.g. rahul1234@gmail.com)
-    if (expectedRole !== 'ADMIN') {
-      const namePart = cleanEmail.split('@')[0] || 'User';
-      const formattedName = namePart
-        .replace(/[._0-9]/g, ' ')
-        .split(' ')
-        .filter(Boolean)
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ') || (expectedRole === 'OWNER' ? 'PG Host' : 'Student');
-
-      const newUser = {
-        id: Date.now(),
-        fullName: formattedName,
-        email: cleanEmail,
-        password: cleanPassword,
-        role: expectedRole || "STUDENT",
-        phone: "+91 98765 " + Math.floor(10000 + Math.random() * 90000),
-        college: expectedRole === 'STUDENT' ? "College of Engineering Pune (COEP)" : "",
-        studentId: expectedRole === 'STUDENT' ? "HS-" + Math.floor(1000 + Math.random() * 9000) : "",
-        city: "Pune",
-        isVerified: true,
-        verificationStatus: "VERIFIED",
-        propertyName: expectedRole === 'OWNER' ? `${formattedName}'s Executive PG` : "",
-        address: expectedRole === 'OWNER' ? "Near Prime Campus Hub, Pune" : ""
-      };
-
-      if (expectedRole === 'OWNER') {
-        getFreshPgs();
-        const ownerPg = {
-          id: Date.now(),
-          name: newUser.propertyName,
-          tagline: "Modern Student Accommodation in Prime Hub",
-          city: "Pune",
-          locality: "Kothrud",
-          address: "Main Campus Road, Kothrud, Pune",
-          pincode: "411038",
-          nearbyColleges: "COEP (3.5 km), MIT-WPU (1.2 km), Symbiosis (4 km)",
-          genderType: "COED",
-          monthlyRent: 8500,
-          securityDeposit: 17000,
-          foodIncluded: true,
-          foodType: "Veg & Non-Veg",
-          hasAc: true,
-          hasWifi: true,
-          hasLaundry: true,
-          hasAttachedBath: true,
-          hasCctv: true,
-          hasPowerBackup: true,
-          hasGym: false,
-          description: `Newly listed student accommodation managed by ${formattedName}. High-speed Wi-Fi, hygienic meals, and verified premises.`,
-          houseRules: "Gate closing at 10:30 PM. Mandatory quiet study hours.",
-          noticePeriodDays: 30,
-          gateClosingTime: "10:30 PM",
-          totalRooms: 12,
-          availableRooms: 6,
-          isVerified: true,
-          verificationStatus: "VERIFIED",
-          rating: 4.8,
-          totalReviews: 2,
-          coverImage: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
-          images: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
-          ownerId: newUser.id,
-          ownerName: newUser.fullName,
-          ownerPhone: newUser.phone,
-          ownerEmail: newUser.email
-        };
-        mockPgs.unshift(ownerPg);
-        savePgsToStorage();
-      }
-
-      registeredUsers.push(newUser);
-      localStorage.setItem('homesetu_registered_users', JSON.stringify(registeredUsers));
-
-      return {
-        success: true,
-        user: newUser,
-        message: `Welcome ${formattedName}! Account activated and logged in successfully.`
-      };
-    }
-
-    // 4. Strict Error exclusively for non-matching Admin login attempts
+    // 3. User is NOT registered! Strict requirement: new student or new owner must register first before logging in.
+    const roleLabel = expectedRole === 'OWNER' ? 'PG Owner' : expectedRole === 'ADMIN' ? 'Admin' : 'Student';
     return {
       success: false,
-      message: "No admin account found with this email. Admin portal is strictly reserved for arshm2772@gmail.com."
+      notRegistered: true,
+      message: `Account not found with email "${cleanEmail}"! Please register first as a ${roleLabel} before logging in.`
     };
   },
 
@@ -1749,6 +1671,16 @@ export const api = {
       if (res && res.ok) return await res.json();
     } catch (e) {
       console.warn("Backend API fallback for register:", e);
+    }
+
+    const cleanEmail = (userData.email || '').trim().toLowerCase();
+    const registeredUsers = JSON.parse(localStorage.getItem('homesetu_registered_users') || '[]');
+    const existing = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      return {
+        success: false,
+        message: `An account with email "${cleanEmail}" is already registered as a ${existing.role}. Please login instead.`
+      };
     }
 
     const newUser = {
@@ -1836,7 +1768,6 @@ export const api = {
       savePgsToStorage();
     }
 
-    const registeredUsers = JSON.parse(localStorage.getItem('homesetu_registered_users') || '[]');
     registeredUsers.push(newUser);
     localStorage.setItem('homesetu_registered_users', JSON.stringify(registeredUsers));
 
