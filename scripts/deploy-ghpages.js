@@ -32,7 +32,7 @@ function deploy() {
     run('git config user.email "aryanguptaji686@gmail.com"');
     run('git add -A');
     run('git commit -m "deploy: update GitHub Pages with latest frontend build"');
-    run('git remote add origin https://github.com/Arshmittal0907/Smart-Home-Setu.git');
+    run('git remote add origin https://github.com/aryangupta42/homesetu.git');
     run('git push origin gh-pages --force');
     console.log('✅ Successfully deployed frontend/dist to gh-pages branch!');
   } finally {
